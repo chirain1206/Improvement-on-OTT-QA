@@ -1,0 +1,13 @@
+/data/all_plain_tables.json
+/data/all_passages.json
+/stage1/
+/stage2/
+/stage3/
+/retriever/text_title_bm25/
+/retriever/title_sectitle_schema/
+/data/tmp/
+/preprocessed_data/stage1_training_data.json
+/preprocessed_data/stage2_training_data.json
+/preprocessed_data/stage3_training_data.json
+/preprocessed_data/train_linked.json
+
