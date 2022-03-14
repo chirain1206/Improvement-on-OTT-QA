@@ -10,4 +10,5 @@
 /preprocessed_data/stage2_training_data.json
 /preprocessed_data/stage3_training_data.json
 /preprocessed_data/train_linked.json
-
+/data/traindev_request_tok/
+/data/traindev_tables_tok/
