@@ -490,7 +490,7 @@ def main():
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
     args = parser.parse_args()
 
-    device = torch.device("cuda")
+    device = torch.device("cuda:2")
     args.n_gpu = torch.cuda.device_count()
     args.device = device
     
@@ -581,8 +581,8 @@ def main():
             model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
 
         # multi-gpu training (should be after apex fp16 initialization)
-        if args.n_gpu > 1:
-            model = torch.nn.DataParallel(model)
+        #if args.n_gpu > 1:
+        #    model = torch.nn.DataParallel(model)
 
         global_step = 0
 
