@@ -490,7 +490,7 @@ def main():
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
     args = parser.parse_args()
 
-    device = torch.device("cuda:2")
+    device = torch.device("cuda:3")
     args.n_gpu = torch.cuda.device_count()
     args.device = device
     
