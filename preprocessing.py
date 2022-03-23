@@ -254,7 +254,11 @@ def CELL(d, table_path=None):
 
 def split_table_segment(table):
     table_id = table['uid']
-    superlative_result = find_superlative(table_id, table)
+    try:
+        superlative_result = find_superlative(table_id, table)
+    except Exception:
+        print("failed with table {}".format(table_id))
+        superlative_result = []
     tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
     suffix = ['st', 'nd', 'rd', 'th']
     table_segments = [table_id]
@@ -264,17 +268,17 @@ def split_table_segment(table):
     for node in superlative_result:
         superlative_dict[tuple(node[1])] = node[3]
 
-    for i, row in enumerate(table[data]):
+    for i, row in enumerate(table['data']):
         cur_segment_token = []
         cur_segment_type = []
         cur_segment_token.append('table')
         cur_segment_token.append('title')
 
         # meta information of table segment
-        title_tokens = tokenizer.tokenize(table[title])
+        title_tokens = tokenizer.tokenize(table['title'])
         cur_segment_token += title_tokens
         cur_segment_token.append('row')
-        cur_segment_token.append('{}{}'.format(i+1, suffix[min(i+1, 3)]))
+        cur_segment_token.append('{}{}'.format(i+1, suffix[min(i, 3)]))
         cur_segment_type += [0] * len(cur_segment_token)
 
         # row information of table segment
@@ -284,7 +288,7 @@ def split_table_segment(table):
                 row_tokens.append(superlative_dict[(i, j)])
             row_tokens.append(table['header'][j].lower())
             row_tokens.append('is')
-            row_tokens.append(cell)
+            row_tokens += tokenizer.tokenize(cell)
             cur_segment_token += row_tokens
             cur_segment_type += [i+1] * len(row_tokens)
 
