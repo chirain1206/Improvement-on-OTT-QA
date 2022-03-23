@@ -12,6 +12,7 @@ import nltk
 import dateparser
 from dateparser.search import search_dates
 from dateparser import parse
+from transformers import BertTokenizer
 import json
 import os
 
@@ -156,15 +157,18 @@ def convert2num(string):
     
 def find_superlative(table_id, table):
     if not os.path.exists('{}/tmp/{}.json'.format(resource_path, table_id)):
+        if not os.path.exists('{}/tmp'.format(resource_path)):
+            os.makedirs('{}/tmp'.format(resource_path))
+
         mapping = {}
-        headers = [_[0] for _ in table['header']]
+        headers = [_ for _ in table['header']]
         for j in range(len(table['header'])):
             mapping[headers[j]] = []
             activate_date_or_num = None
             if headers[j] not in ['#', 'Type', 'Name', 'Location', 'Position', 'Category', 'Nationality',
                                   'School', 'Notes', 'Notability', 'Country']:
                 for i, row in enumerate(table['data']):
-                    data = table['data'][i][j][0]
+                    data = table['data'][i][j]
                     if data in ['', '-']:
                         continue
 
@@ -247,6 +251,45 @@ def CELL(d, table_path=None):
             print("failed with table {}".format(table_id))
 
     return d
+
+def split_table_segment(table):
+    table_id = table['uid']
+    superlative_result = find_superlative(table_id, table)
+    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
+    suffix = ['st', 'nd', 'rd', 'th']
+    table_segments = [table_id]
+
+    # extract superlative information
+    superlative_dict = {}
+    for node in superlative_result:
+        superlative_dict[tuple(node[1])] = node[3]
+
+    for i, row in enumerate(table[data]):
+        cur_segment_token = []
+        cur_segment_type = []
+        cur_segment_token.append('table')
+        cur_segment_token.append('title')
+
+        # meta information of table segment
+        title_tokens = tokenizer.tokenize(table[title])
+        cur_segment_token += title_tokens
+        cur_segment_token.append('row')
+        cur_segment_token.append('{}{}'.format(i+1, suffix[min(i+1, 3)]))
+        cur_segment_type += [0] * len(cur_segment_token)
+
+        # row information of table segment
+        for j, cell in enumerate(row):
+            row_tokens = []
+            if (i, j) in superlative_dict:
+                row_tokens.append(superlative_dict[(i, j)])
+            row_tokens.append(table['header'][j].lower())
+            row_tokens.append('is')
+            row_tokens.append(cell)
+            cur_segment_token += row_tokens
+            cur_segment_type += [i+1] * len(row_tokens)
+
+        table_segments.append([cur_segment_token, cur_segment_type])
+    return table_segments
 
 def analyze(processed, table_path):
     trivial, easy, medium, hard, no_answer, number, yesorno, repeated = 0, 0, 0, 0, 0, 0, 0, 0
