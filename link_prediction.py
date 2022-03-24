@@ -9,7 +9,10 @@ from torch.autograd import Variable
 from transformers import GPT2Config
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from torch.utils.data import Dataset
-from torch.utils.tensorboard import SummaryWriter
+try:
+    from torch.utils.tensorboard import SummaryWriter
+except ImportError:
+    from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 import json
 import torch.optim as optim
