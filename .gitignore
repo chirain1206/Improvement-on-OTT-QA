@@ -12,3 +12,7 @@
 /preprocessed_data/train_linked.json
 /data/traindev_request_tok/
 /data/traindev_tables_tok/
+/preprocessed_data/train_table_segments.json
+nohup.out
+link_generator/model-ep*
+link_generator/03*
