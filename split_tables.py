@@ -44,10 +44,6 @@ if __name__ == '__main__':
         dict_results = {}
         print("using {}".format(args.split))
         if not os.path.exists(f'preprocessed_data/{args.split}_table_segments.json'):
-            with open(f'released_data/{args.split}.traced.json', 'r') as f:
-                data = json.load(f)
-
-            # extract tables corresponding to each training question
             data = list(plain_tables.values())
             results = []
             with Pool(n_threads) as p:
