@@ -259,38 +259,35 @@ def split_table_segment(table):
     except Exception:
         print("failed with table {}".format(table_id))
         superlative_result = []
-    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
+    b_tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
+    b_tokenizer.add_tokens(["[TAB]","[TITLE]","[ROW]","[MAX]","[MIN]","[EAR]","[LAT]"])
     suffix = ['st', 'nd', 'rd', 'th']
+    superlative_token_dict = {'maximum':'[MAX] ', 'minimum':'[MIN] ', 'earliest':'[EAR] ', 'latest':'[LAT] '}
     table_segments = [table_id]
 
     # extract superlative information
     superlative_dict = {}
     for node in superlative_result:
-        superlative_dict[tuple(node[1])] = node[3]
+        superlative_dict[tuple(node[1])] = superlative_token_dict[node[3]]
 
     for i, row in enumerate(table['data']):
         cur_segment_token = []
         cur_segment_type = []
-        cur_segment_token.append('table')
-        cur_segment_token.append('title')
 
         # meta information of table segment
-        title_tokens = tokenizer.tokenize(table['title'])
-        cur_segment_token += title_tokens
-        cur_segment_token.append('row')
-        cur_segment_token.append('{}{}'.format(i+1, suffix[min(i, 3)]))
+        meta_tokens = b_tokenizer.tokenize('[TAB] [TITLE] ' + table['title'] + ' [ROW] ' + '{}{}'.format(i+1, suffix[min(i, 3)]))
+        cur_segment_token += meta_tokens
         cur_segment_type += [0] * len(cur_segment_token)
 
         # row information of table segment
         for j, cell in enumerate(row):
             row_tokens = []
+            tmp_str = ''
             if (i, j) in superlative_dict:
-                row_tokens.append(superlative_dict[(i, j)])
-            row_tokens.append(table['header'][j].lower())
-            row_tokens.append('is')
-            row_tokens += tokenizer.tokenize(cell)
+                tmp_str += superlative_dict[(i, j)]
+            row_tokens += b_tokenizer.tokenize(tmp_str + table['header'][j] + ' is ' + cell)
             cur_segment_token += row_tokens
-            cur_segment_type += [i+1] * len(row_tokens)
+            cur_segment_type += [(j+1)%2] * len(row_tokens)
 
         table_segments.append([cur_segment_token, cur_segment_type])
     return table_segments
