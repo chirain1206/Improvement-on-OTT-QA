@@ -139,7 +139,7 @@ python link_prediction.py --dataset data/traindev_tables.json --do_train --batch
 ```
 To generate links, please run
 ```
-python link_prediction.py --do_all --load_from link_generator/model-ep9.pt --dataset data/all_plain_tables.json --batch_size 256
+python link_prediction.py --do_all --load_from link_generator/model-ep9.pt --dataset data/all_plain_tables.json --batch_size 256 --shard [current_iteration]@[total_iteration_number]
 ```
 This command will generate all the link mapping in the link_generator/ folder.
 
