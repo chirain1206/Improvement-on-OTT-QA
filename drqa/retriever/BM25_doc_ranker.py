@@ -30,16 +30,15 @@ class BM25DocRanker(object):
     Scores new queries by taking sparse dot products.
     """
 
-    def __init__(self, tfidf_path, strict=True):
+    def __init__(self, bm25_path, strict=True):
         """
         Args:
-            tfidf_path: path to saved model file
+            bm25_path: path to saved model file
             strict: fail on empty queries or continue (and return empty result)
         """
         # Load from disk
-        tfidf_path = tfidf_path
-        logger.info('Loading %s' % tfidf_path)
-        matrix, metadata = utils.load_sparse_csr(tfidf_path)
+        logger.info('Loading %s' % bm25_path)
+        matrix, metadata = utils.load_sparse_csr(bm25_path)
         self.doc_mat = matrix
         self.ngrams = metadata['ngram']
         self.hash_size = metadata['hash_size']
@@ -58,8 +57,8 @@ class BM25DocRanker(object):
         return self.doc_dict[1][doc_index]
 
     def closest_docs(self, query, k=1):
-        """Closest docs by dot product between query and documents
-        in tfidf weighted word vector space.
+        """Closest docs by BM25
+        in BM25 weighted word vector space.
         """
         spvec = self.text2spvec(query)
         res = spvec * self.doc_mat
@@ -90,7 +89,7 @@ class BM25DocRanker(object):
                              filter_fn=utils.filter_ngram)
 
     def text2spvec(self, query):
-        """Create a sparse tfidf-weighted word vector from query.
+        """Create a sparse BM25 word vector from query.
 
         tfidf = log(tf + 1) * log((N - Nt + 0.5) / (Nt + 0.5))
         """
@@ -107,15 +106,15 @@ class BM25DocRanker(object):
 
         # Count TF
         wids_unique, wids_counts = np.unique(wids, return_counts=True)
-        tfs = (wids_counts > 0).astype(int)
+        data = (wids_counts > 0).astype(int)
 
         # Count IDF
-        Ns = self.doc_freqs[wids_unique]
-        idfs = np.log((self.num_docs - Ns + 0.5) / (Ns + 0.5))
-        idfs[idfs < 0] = 0
+        # Ns = self.doc_freqs[wids_unique]
+        # idfs = np.log((self.num_docs - Ns + 0.5) / (Ns + 0.5))
+        # idfs[idfs < 0] = 0
 
         # TF-IDF
-        data = np.multiply(tfs, idfs)
+        # data = np.multiply(tfs, idfs)
 
         # One row, sparse csr matrix
         indptr = np.array([0, len(wids_unique)])

@@ -85,11 +85,16 @@ python split_tables.py --split train
 ```
 This command will split tables in training set into tables segments, which is the basic retrieval unit for table in subsequent steps.
 
-### Step2-2 [Optional]: Split all tables in dataset into table segments
+### Step2-2: Fuse table segments with their linked passages
 ```
-python split_tables.py --split all
+python preprocess_generated_query.py
 ```
-This command will split all tables in dataset into tables segments, which is the basic retrieval unit for table in subsequent steps.
+This command simply combines predicted passages from GPT-2 model into single file, which is originally stored in several files.
+
+```
+python fuse_segment_passage.py --split train --model retriever/text_title_bm25/index-bm25-ngram\=2-hash\=16777216-tokenizer\=simple.npz
+```
+This command fuses table segments in training set with their linked passages into fused blocks.
 
 ### Step2-3: Train the three modules in the reader.
 ```
