@@ -20,7 +20,7 @@ parser.add_argument('--split', type=str, default='train')
 args = parser.parse_args()
 
 logger.info('Initializing ranker...')
-ranker = retriever.get_class(args.option)(bm25_path=args.model)
+ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
 tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
 tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
 max_block_len = 512
