@@ -79,13 +79,19 @@ This script will produce the table retrieval results in terms of HITS@1,5,10,20,
 ```
 unzip models.zip
 ```
-### Step2-1: Preprocess the training data
+### Step2-1: Split training tables into table segments
 ```
-python retrieve_and_preprocess.py --split train
+python split_tables.py --split train
 ```
-This command will generate training data for different submodules in the following steps.
+This command will split tables in training set into tables segments, which is the basic retrieval unit for table in subsequent steps.
 
-### Step2-2: Train the three modules in the reader.
+### Step2-2 [Optional]: Split all tables in dataset into table segments
+```
+python split_tables.py --split all
+```
+This command will split all tables in dataset into tables segments, which is the basic retrieval unit for table in subsequent steps.
+
+### Step2-3: Train the three modules in the reader.
 ```
 python train_stage12.py --do_lower_case --do_train --train_file preprocessed_data/stage1_training_data.json --learning_rate 2e-6 --option stage1 --num_train_epochs 3.0 --model_name_or_path bert-large-uncased
 python train_stage12.py --do_lower_case --do_train --train_file preprocessed_data/stage2_training_data.json --learning_rate 5e-6 --option stage2 --num_train_epochs 3.0 --model_name_or_path bert-large-uncased
