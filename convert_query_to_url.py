@@ -5,6 +5,7 @@ from multiprocessing import Pool
 import argparse
 import logging
 import json
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -34,21 +35,46 @@ def query_to_url(table_segment):
     return [segment_name, url_lst]
 
 if __name__ == '__main__':
-    n_threads = 64
+    n_threads = os.cpu_count()
     with open('link_generator/all_passage_query.json', 'r') as f:
         data = json.load(f)
 
-    data = [[name, data[name]] for name in data]
+    if args.split == 'all':
+        data = [[name, data[name]] for name in data]
 
-    with Pool(n_threads) as p:
-        all_query_url = list(
-            tqdm(
-                p.imap(query_to_url, data),
-                total=len(data),
-                desc='Use BM25 to find url for each query',
+        with Pool(n_threads) as p:
+            all_query_url = list(
+                tqdm(
+                    p.imap(query_to_url, data),
+                    total=len(data),
+                    desc='Use BM25 to find url for each query',
+                )
             )
-        )
-    all_query_url = {segment_name:url_lst for segment_name, url_lst in all_query_url}
+        all_query_url = {segment_name:url_lst for segment_name, url_lst in all_query_url}
 
-    with open('link_generator/all_url.json', 'w') as f:
-        json.dump(all_query_url, f, indent=2)
+        with open(f'link_generator/{args.split}_url.json', 'w') as f:
+            json.dump(all_query_url, f, indent=2)
+    elif args.split == 'train':
+        train_names = []
+        with open('preprocessed_data/train_table_segments.json', 'r') as f:
+            train_segments = json.load(f)
+
+        # extract names of table segments to be trained
+        for segment_name in train_segments:
+            for row_index, row in enumerate(train_segments[segment_name]):
+                train_names.append(segment_name + f'_{row_index}')
+
+        data = [[name, data[name]] for name in train_names]
+
+        with Pool(n_threads) as p:
+            all_query_url = list(
+                tqdm(
+                    p.imap(query_to_url, data),
+                    total=len(data),
+                    desc='Use BM25 to find url for each query',
+                )
+            )
+        all_query_url = {segment_name:url_lst for segment_name, url_lst in all_query_url}
+
+        with open(f'link_generator/{args.split}_url.json', 'w') as f:
+            json.dump(all_query_url, f, indent=2)
