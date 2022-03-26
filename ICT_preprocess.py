@@ -84,7 +84,6 @@ if __name__ == '__main__':
         passages = json.load(f)
 
     bert_tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
-    bert_tokenizer.add_tokens(["[TAB]","[TITLE]","[ROW]","[MAX]","[MIN]","[EAR]","[LAT]"])
     block_names = list(data.keys())
     random.shuffle(block_names)
     shuffle_data = [[name, data[name]] for name in block_names]
