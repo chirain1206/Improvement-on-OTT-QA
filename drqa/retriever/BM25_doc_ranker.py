@@ -60,18 +60,21 @@ class BM25DocRanker(object):
         """Closest docs by BM25
         in BM25 weighted word vector space.
         """
-        spvec = self.text2spvec(query)
-        res = spvec * self.doc_mat
+        return_vector, spvec = self.text2spvec(query)
+        if return_vector:
+            res = spvec * self.doc_mat
 
-        if len(res.data) <= k:
-            o_sort = np.argsort(-res.data)
+            if len(res.data) <= k:
+                o_sort = np.argsort(-res.data)
+            else:
+                o = np.argpartition(-res.data, k)[0:k]
+                o_sort = o[np.argsort(-res.data[o])]
+
+            doc_scores = res.data[o_sort]
+            doc_ids = [self.get_doc_id(i) for i in res.indices[o_sort]]
+            return doc_ids, doc_scores
         else:
-            o = np.argpartition(-res.data, k)[0:k]
-            o_sort = o[np.argsort(-res.data[o])]
-
-        doc_scores = res.data[o_sort]
-        doc_ids = [self.get_doc_id(i) for i in res.indices[o_sort]]
-        return doc_ids, doc_scores
+            return [], []
 
     def batch_closest_docs(self, queries, k=1, num_workers=None):
         """Process a batch of closest_docs requests multithreaded.
@@ -102,7 +105,7 @@ class BM25DocRanker(object):
                 raise RuntimeError('No valid word in: %s' % query)
             else:
                 logger.warning('No valid word in: %s' % query)
-                return sp.csr_matrix((1, self.hash_size))
+                return False, sp.csr_matrix((1, self.hash_size))
 
         # Count TF
         wids_unique, wids_counts = np.unique(wids, return_counts=True)
@@ -122,4 +125,4 @@ class BM25DocRanker(object):
             (data, wids_unique, indptr), shape=(1, self.hash_size)
         )
 
-        return spvec
+        return True, spvec
