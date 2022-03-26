@@ -54,7 +54,7 @@ def generate_pseudo_train_sample(cur_fused_block):
     if len(segment_urls) > 0:
         sample_url = random.choice(segment_urls)
         sample_passage = passages[sample_url]
-        if sentence_tokenizer.tokenize(sample_passage) == None:
+        if not sentence_tokenizer.tokenize(sample_passage):
             print(segment_urls)
             print(sample_url)
             print(sample_passage)
