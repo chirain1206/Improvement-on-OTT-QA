@@ -19,18 +19,36 @@ parser.add_argument('--option', type=str, default='bm25')
 parser.add_argument('--split', type=str, default='train')
 args = parser.parse_args()
 
-if __name__ == '__main__':
-    logger.info('Initializing ranker...')
-    ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
-    all_query_url = {}
-    with open('link_generator/all_passage_query.json', 'r') as f:
-        querys = json.load(f)
+logger.info('Initializing ranker...')
+ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
 
-    for segment_name, query_lst in tqdm(querys.items(), desc='Use BM25 to find url for each query',):
-        all_query_url[segment_name] = []
-        for query in query_lst:
-            if len(ranker.closest_docs(query, 1)[0]) > 0:
-                all_query_url[segment_name].append(ranker.closest_docs(query, 1)[0][0])
+def query_to_url(table_segment):
+    segment_name = table_segment[0]
+    query_lst = table_segment[1]
+    url_lst = []
+
+    for query in query_lst:
+        if len(ranker.closest_docs(query, 1)[0]) > 0:
+            url_lst.append(ranker.closest_docs(query, 1)[0][0])
+
+    return [segment_name, url_lst]
+
+if __name__ == '__main__':
+    n_threads = 64
+    with open('link_generator/all_passage_query.json', 'r') as f:
+        data = json.load(f)
+
+    data = [[name, data[name]] for name in data]
+
+    with Pool(n_threads) as p:
+        all_query_url = list(
+            tqdm(
+                p.imap(query_to_url, data),
+                total=len(data),
+                desc='Use BM25 to find url for each query',
+            )
+        )
+    all_query_url = {segment_name:url_lst for segment_name, url_lst in all_query_url}
 
     with open('link_generator/all_url.json', 'w') as f:
         json.dump(all_query_url, f, indent=2)
