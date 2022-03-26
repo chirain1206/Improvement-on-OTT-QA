@@ -45,7 +45,7 @@ def generate_pseudo_train_sample(cur_fused_block):
     row_index = int(cur_fused_block[0][cur_fused_block[0].rfind('_')+1:])
     for j, cell in enumerate(cur_table['data'][row_index]):
         half_cell = half_tokenize(cell[0])
-        tokens += cur_table['header'][j][0] + ' is ' + half_cell
+        tokens += cur_table['header'][j][0] + ' is ' + half_cell + ' '
     tokens = bert_tokenizer.tokenize(tokens)
     token_type = [0] * len(tokens)
 
