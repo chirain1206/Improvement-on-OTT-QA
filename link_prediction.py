@@ -63,13 +63,15 @@ def sample_sequence(model, length, context, args, num_samples=1, temperature=1, 
 
 
 class LinkGenearationDataset(Dataset):
-    def __init__(self, datapath, option, tokenizer, source_max_len, target_max_len, shards=None):
+    def __init__(self, datapath, option, tokenizer, source_max_len, target_max_len, shards=None, remaining=False):
         super(LinkGenearationDataset, self).__init__()
         self.tokenizer = tokenizer
         self.source_max_len = source_max_len
         self.target_max_len = target_max_len
         self.option = option
         self.mapping = {}
+        self.remaining = remaining
+        absent_table_ids = []
         assert option in ['train', 'dev', 'all']
         if option != 'all':
             with open('released_data/train_dev_test_table_ids.json', 'r') as f:
@@ -79,13 +81,25 @@ class LinkGenearationDataset(Dataset):
             tables = json.load(f)
 
         if self.option == 'all':
-            assert shards is not None
-            index, total_shard = [int(_) for _ in shards.split('@')]
-            table_ids = list(tables.keys())
-            length = len(table_ids) // total_shard
-            table_ids = table_ids[index * length : (index+1) * length]
-            print("Running {} out of shard {}".format(index, total_shard))
-            table_ids = set(table_ids)
+            if self.remaining == False:
+                assert shards is not None
+                index, total_shard = [int(_) for _ in shards.split('@')]
+                table_ids = list(tables.keys())
+                length = len(table_ids) // total_shard
+                table_ids = table_ids[index * length : (index+1) * length]
+                print("Running {} out of shard {}".format(index, total_shard))
+                table_ids = set(table_ids)
+            else:
+                total_shard = 8
+                table_ids = list(tables.keys())
+                length = len(table_ids) // total_shard
+                table_ids = table_ids[total_shard * length:]
+                print("Running {} out of shard {}".format(total_shard, total_shard))
+                table_ids = set(table_ids)
+                with open('link_generator/absent_rows.json', 'r') as f:
+                    absent_table_ids = json.load(f)
+                    for cur_row in absent_table_ids:
+                        table_ids.add(cur_row[:cur_row.rfind('_')])
 
         self.data = []
         for k, table in tables.items():
