@@ -26,7 +26,7 @@ if __name__ == '__main__':
     with open('link_generator/all_passage_query.json', 'r') as f:
         querys = json.load(f)
 
-    for segment_name, query_lst in list(tqdm(querys.items())):
+    for segment_name, query_lst in tqdm(querys.items(), desc='Use BM25 to find url for each query',):
         all_query_url[segment_name] = []
         for query in query_lst:
             if len(ranker.closest_docs(query, 1)[0]) > 0:
