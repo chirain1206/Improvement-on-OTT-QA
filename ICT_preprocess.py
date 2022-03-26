@@ -40,11 +40,11 @@ def generate_pseudo_train_sample(cur_fused_block):
     table_name = cur_fused_block[0][:cur_fused_block[0].rfind('_')]
     with open(f'data/traindev_tables_tok/{table_name}.json', 'r') as f:
         cur_table = json.load(f)
-    half_title = tokenize(cur_table['title'])
+    half_title = half_tokenize(cur_table['title'])
     tokens += half_title + ' '
     row_index = int(cur_fused_block[0][cur_fused_block[0].rfind('_')+1:])
     for j, cell in enumerate(cur_table['data'][row_index]):
-        half_cell = tokenize(cell[0])
+        half_cell = half_tokenize(cell[0])
         tokens += cur_table['header'][j][0] + ' is ' + half_cell
     tokens = bert_tokenizer.tokenize(tokens)
     token_type = [0] * len(tokens)
