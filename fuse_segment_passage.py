@@ -39,9 +39,12 @@ def fusion(cur_table_name):
         token_type = [0] + row[1]
 
         # find linked passages
-        linked_url = [ranker.closest_docs(generated_query, 1)[0][0] for generated_query in
-                      querys[cur_table_name + f'_{row_index}'] if len(ranker.closest_docs(generated_query, 1)[0]) > 0]
-        linked_passages = [passages[url] for url in linked_url]
+        if cur_table_name + f'_{row_index}' in querys:
+            linked_url = [ranker.closest_docs(generated_query, 1)[0][0] for generated_query in
+                          querys[cur_table_name + f'_{row_index}'] if len(ranker.closest_docs(generated_query, 1)[0]) > 0]
+            linked_passages = [passages[url] for url in linked_url]
+        else:
+            linked_passages = []
 
         # concatenate passages to end of table segment
         for cur_passage in linked_passages:

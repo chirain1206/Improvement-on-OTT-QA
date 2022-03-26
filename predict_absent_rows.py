@@ -92,7 +92,7 @@ if __name__ == '__main__':
         else:
             mapping[k].extend(v)
 
-    f = open('link_generator/row_passage_query.json-0000{}-0000{}'.format(8, 8), 'w')
+    f = open('link_generator/row_passage_query.json-0000{}-of-0000{}'.format(8, 8), 'w')
     for k, v in mapping.items():
         json_str = json.dumps((k, v))
         f.write(json_str + '\n')
