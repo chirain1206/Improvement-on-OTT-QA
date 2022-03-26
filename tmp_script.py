@@ -1,7 +1,7 @@
 import json
 
 if __name__ == '__main__':
-    with open('preprocessed_data/train_table_segments.json', r) as f:
+    with open('preprocessed_data/train_table_segments.json', 'r') as f:
         data = json.load(f)
 
     with open('link_generator/all_passage_query.json', 'r') as f:
