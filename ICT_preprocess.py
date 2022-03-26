@@ -54,12 +54,10 @@ def generate_pseudo_train_sample(cur_fused_block):
     if len(segment_urls) > 0:
         sample_url = random.choice(segment_urls)
         sample_passage = passages[sample_url]
-        if not sentence_tokenizer.tokenize(sample_passage):
-            print(segment_urls)
-            print(sample_url)
-            print(sample_passage)
-            print(sentence_tokenizer.tokenize(sample_passage))
-        sample_sentence = '[SEP] ' + random.choice(sentence_tokenizer.tokenize(sample_passage)) + ' [SEP]'
+        if len(sample_passage) > 0:
+            sample_sentence = '[SEP] ' + random.choice(sentence_tokenizer.tokenize(sample_passage)) + ' [SEP]'
+        else:
+            sample_sentence = '[SEP]'
     else:
         sample_sentence = '[SEP]'
 
