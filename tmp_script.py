@@ -1,4 +1,5 @@
 import json
+from tqdm import tqdm
 
 if __name__ == '__main__':
     with open('preprocessed_data/train_table_segments.json', 'r') as f:
@@ -9,7 +10,7 @@ if __name__ == '__main__':
 
     absent_row = []
     table_names = list(data.keys())
-    for name in table_names:
+    for name in tqdm(table_names):
         if name not in querys:
             absent_row.append(name)
 
