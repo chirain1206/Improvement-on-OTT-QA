@@ -64,7 +64,7 @@ if __name__ == '__main__':
             for row_index, row in enumerate(train_segments[segment_name]):
                 train_names.append(segment_name + f'_{row_index}')
 
-        data = [[name, data[name]] for name in train_names]
+        data = [[name, data[name]] for name in train_names if name in data]
 
         with Pool(n_threads) as p:
             all_query_url = list(
