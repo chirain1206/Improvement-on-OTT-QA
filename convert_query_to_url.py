@@ -22,7 +22,6 @@ args = parser.parse_args()
 if __name__ == '__main__':
     logger.info('Initializing ranker...')
     ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
-    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
     all_query_url = {}
     with open('link_generator/all_passage_query.json', 'r') as f:
         querys = json.load(f)
