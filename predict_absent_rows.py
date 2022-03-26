@@ -64,7 +64,7 @@ if __name__ == '__main__':
     print("Loaded model from {}".format(args.load_from))
 
     mapping = {}
-    for indexed_batch in tqdm(dev_dataloader, desc="Decoding"):
+    for indexed_batch in tqdm(dataloader, desc="Decoding"):
         batch = tuple(t.to(args.device) for t in indexed_batch[2:])
         row_ids = indexed_batch[0]
         links = indexed_batch[1]
