@@ -10,6 +10,7 @@ import nltk.data
 import drqa.drqa_tokenizers
 import math
 import os
+from multiprocessing.util import Finalize
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
