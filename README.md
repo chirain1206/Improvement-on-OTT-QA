@@ -87,9 +87,19 @@ This command will split tables in training set into tables segments, which is th
 
 ### Step2-2: Fuse table segments with their linked passages
 ```
+python find_absent_segments.py
+```
+This command finds table segments in training set that are not used by the GPT-2 model to generate link passages.
+
+```
+python predict_absent_rows.py --do_all --load_from link_generator/model-ep9.pt --dataset data/all_plain_tables.json --batch_size 256
+```
+This command used the trained GPT-2 model to generate querys for remaining table segments.
+
+```
 python preprocess_generated_query.py
 ```
-This command simply combines predicted passages from GPT-2 model into single file, which is originally stored in several files.
+This script simply combines generated querys from GPT-2 model into single file, which is originally stored in different files.
 
 ```
 python fuse_segment_passage.py --split train --model retriever/text_title_bm25/index-bm25-ngram\=2-hash\=16777216-tokenizer\=simple.npz
