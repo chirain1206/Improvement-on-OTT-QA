@@ -30,8 +30,8 @@ if __name__ == '__main__':
     for segment_name, query_lst in list(tqdm(querys.items())):
         all_query_url[segment_name] = []
         for query in query_lst:
-            if len(ranker.closest_docs(generated_query, 1)[0]) > 0:
-                all_query_url[segment_name].append(ranker.closest_docs(generated_query, 1)[0][0])
+            if len(ranker.closest_docs(query, 1)[0]) > 0:
+                all_query_url[segment_name].append(ranker.closest_docs(query, 1)[0][0])
 
     with open('link_generator/all_url.json', 'w') as f:
         json.dump(all_query_url, f, indent=2)

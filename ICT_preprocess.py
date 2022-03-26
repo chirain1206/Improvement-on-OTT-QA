@@ -15,7 +15,7 @@ console.setFormatter(fmt)
 logger.addHandler(console)
 
 def generate_pseudo_train_sample(cur_fused_block):
-    
+
 
     return pseudo_query, cur_fused_block[1]
 
