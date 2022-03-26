@@ -10,9 +10,10 @@ if __name__ == '__main__':
 
     absent_row = []
     table_names = list(data.keys())
-    for name in tqdm(table_names):
-        if name not in querys:
-            absent_row.append(name)
+    for cur_table_name in tqdm(table_names):
+        for row_index, row in enumerate(data[cur_table_name]):
+            if cur_table_name + f'_{row_index}' not in querys:
+                absent_row.append(cur_table_name + f'_{row_index}')
 
     with open('absent_row.json', 'w') as f:
         json.dump(absent_row, f, indent=2)
