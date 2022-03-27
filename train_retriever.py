@@ -138,6 +138,7 @@ if __name__ == '__main__':
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     args = parser.parse_args()
     args.output_dir = os.path.join('retriever', args.option)
+    args.batch_size = math.ceil(math.sqrt(args.batch_size))
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
     args.output_dir_query = os.path.join(args.output_dir, args.output_dir_query)
@@ -221,8 +222,8 @@ if __name__ == '__main__':
 
     args.num_train_epoches = args.train_steps // (len(dataset) // args.batch_size)
     t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
-    epoch_log_step = [i for i in range(0,args.num_train_epoches,math.floor(args.num_train_epoches/4)) if i != 0]
-    epoch_log_step[-1] = args.num_train_epoches
+    # epoch_log_step = [i for i in range(0,args.num_train_epoches,math.floor(args.num_train_epoches/4)) if i != 0]
+    # epoch_log_step[-1] = args.num_train_epoches
 
     query_scheduler = get_linear_schedule_with_warmup(
         query_optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
@@ -278,22 +279,22 @@ if __name__ == '__main__':
                     tb_writer.add_scalar("{}_loss".format('train'), (tr_loss - logging_loss) / args.logging_steps, global_step)
                     logging_loss = tr_loss
 
-        if epoch + 1 in epoch_log_step:
-            # Save model checkpoint
-            output_dir_query = os.path.join(args.output_dir_query, "checkpoint-epoch{}".format(epoch))
-            if not os.path.exists(output_dir_query):
-                os.makedirs(output_dir_query)
-            query_model_to_save = query_model.module if hasattr(query_model, "module") else query_model
-            query_model_to_save.save_pretrained(output_dir_query)
-            query_tokenizer.save_pretrained(output_dir_query)
-            torch.save(args, os.path.join(output_dir_query, "training_args.bin"))
+        # if epoch + 1 in epoch_log_step:
+        # Save model checkpoint
+        output_dir_query = os.path.join(args.output_dir_query, "checkpoint-epoch{}".format(epoch))
+        if not os.path.exists(output_dir_query):
+            os.makedirs(output_dir_query)
+        query_model_to_save = query_model.module if hasattr(query_model, "module") else query_model
+        query_model_to_save.save_pretrained(output_dir_query)
+        query_tokenizer.save_pretrained(output_dir_query)
+        torch.save(args, os.path.join(output_dir_query, "training_args.bin"))
 
-            output_dir_block = os.path.join(args.output_dir_block, "checkpoint-epoch{}".format(epoch))
-            if not os.path.exists(output_dir_block):
-                os.makedirs(output_dir_block)
-            block_model_to_save = block_model.module if hasattr(block_model, "module") else block_model
-            block_model_to_save.save_pretrained(output_dir_block)
-            block_tokenizer.save_pretrained(output_dir_block)
-            torch.save(args, os.path.join(output_dir_block, "training_args.bin"))
+        output_dir_block = os.path.join(args.output_dir_block, "checkpoint-epoch{}".format(epoch))
+        if not os.path.exists(output_dir_block):
+            os.makedirs(output_dir_block)
+        block_model_to_save = block_model.module if hasattr(block_model, "module") else block_model
+        block_model_to_save.save_pretrained(output_dir_block)
+        block_tokenizer.save_pretrained(output_dir_block)
+        torch.save(args, os.path.join(output_dir_block, "training_args.bin"))
 
     tb_writer.close()

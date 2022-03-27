@@ -19,6 +19,10 @@ console = logging.StreamHandler()
 console.setFormatter(fmt)
 logger.addHandler(console)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--max_query_len', type=int, default=64)
+args = parser.parse_args()
+
 PROCESS_TOK = None
 
 # randomly drop half of the words from the sentence and return
@@ -65,9 +69,9 @@ def generate_pseudo_train_sample(cur_fused_block):
     tokens += bert_tokenizer.tokenize(sample_sentence)
     token_type += [1] * (len(tokens) - len(token_type))
     token_mask = [1] * len(tokens)
-    token_type += [0] * (max_block_len - len(tokens))
-    token_mask += [0] * (max_block_len - len(tokens))
-    tokens += ["[PAD]"] * (max_block_len - len(tokens))
+    token_type += [0] * (args.max_query_len - len(tokens))
+    token_mask += [0] * (args.max_query_len - len(tokens))
+    tokens += ["[PAD]"] * (args.max_query_len - len(tokens))
     pseudo_query = [tokens, token_type, token_mask]
 
     # return pseudo query and the original block
@@ -75,7 +79,6 @@ def generate_pseudo_train_sample(cur_fused_block):
 
 if __name__ == '__main__':
     n_threads = os.cpu_count()
-    max_block_len = 512
     sentence_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     with open('preprocessed_data/train_fused_blocks.json', 'r') as f:
