@@ -107,7 +107,7 @@ python convert_query_to_url.py --split train --model retriever/text_title_bm25/i
 This script finds closest passages for generated querys in training set using BM25 criterion.
 
 ```
-python fuse_segment_passage.py --split train --model retriever/text_title_bm25/index-bm25-ngram\=2-hash\=16777216-tokenizer\=simple.npz
+python fuse_segment_passage.py --split train
 ```
 This command fuses table segments in training set with their linked passages into fused blocks.
 

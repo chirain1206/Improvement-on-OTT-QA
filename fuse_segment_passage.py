@@ -14,14 +14,14 @@ console.setFormatter(fmt)
 logger.addHandler(console)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, required=True)
+# parser.add_argument('--model', type=str, required=True)
 parser.add_argument('--option', type=str, default='bm25')
 parser.add_argument('--split', type=str, default='train')
 parser.add_argument('--max_block_len', type=int, default=256)
 args = parser.parse_args()
 
-logger.info('Initializing ranker...')
-ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
+# logger.info('Initializing ranker...')
+# ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
 tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
 tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
 with open('link_generator/all_passage_query.json', 'r') as f:
