@@ -19,3 +19,5 @@ link_generator/03*
 link_generator/all_passage_query.json
 /preprocessed_data/train_fused_blocks.json
 /preprocessed_data/all_table_segments.json
+/retriever/ICT/
+/retriever/ICT_pretrain_data.json
