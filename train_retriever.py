@@ -133,7 +133,7 @@ if __name__ == '__main__':
         "--model_name_or_path",
         default="bert-base-uncased",
         type=str,
-        help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(ALL_MODELS),
+        help="Path to pre-trained model or shortcut name selected in the list"
     )
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     args = parser.parse_args()
@@ -295,5 +295,5 @@ if __name__ == '__main__':
             block_model_to_save.save_pretrained(output_dir_block)
             block_tokenizer.save_pretrained(output_dir_block)
             torch.save(args, os.path.join(output_dir_block, "training_args.bin"))
-            
+
     tb_writer.close()
