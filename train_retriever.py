@@ -197,7 +197,7 @@ if __name__ == '__main__':
     dataset = retrieverDataset(train_data, query_tokenizer, block_tokenizer, shuffle=False)
     sampler = RandomSampler(dataset)
     loader = DataLoader(dataset, batch_size=args.batch_size, sampler=sampler, num_workers=8, pin_memory=True, drop_last=True)
-    print("Dataset Size = {}. Loader Size = {}".format(len(dataset), len(dataloader)))
+    print("Dataset Size = {}. Loader Size = {}".format(len(dataset), len(loader)))
 
     tb_writer = SummaryWriter(log_dir=args.output_dir)
     # Prepare optimizer and schedule (linear warmup and decay)
