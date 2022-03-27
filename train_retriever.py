@@ -195,7 +195,7 @@ if __name__ == '__main__':
     with open(args.train_file, 'r') as f:
         train_data = json.load(f)
     dataset = retrieverDataset(train_data, query_tokenizer, block_tokenizer, shuffle=False)
-    sampler = SequentialSampler(dataset)
+    sampler = RandomSampler(dataset)
     loader = DataLoader(dataset, batch_size=args.batch_size, sampler=sampler, num_workers=8, pin_memory=True, drop_last=True)
     print("Dataset Size = {}. Loader Size = {}".format(len(dataset), len(dataloader)))
 
