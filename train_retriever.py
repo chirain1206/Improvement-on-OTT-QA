@@ -109,7 +109,7 @@ if __name__ == '__main__':
         help="Where do you want to store the pre-trained models downloaded from s3",
     )
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
-    parser.add_argument("--logging_steps", type=int, default=50, help="Log every X updates steps.")
+    parser.add_argument("--logging_steps", type=int, default=1024, help="Log every X updates steps.")
     parser.add_argument("--train_steps", default=10000, type=int, help="Total training steps.")
     parser.add_argument("--batch_size", default=2048, type=int, help="Batch sizes for each iteration.")
     parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     if not os.path.exists(args.output_dir_block):
         os.makedirs(args.output_dir_block)
 
-    device = torch.device("cuda")
+    device = torch.device("cuda:0")
     args.n_gpu = torch.cuda.device_count()
     args.device = device
 
@@ -186,9 +186,9 @@ if __name__ == '__main__':
                                  args.orig_dim, args.proj_dim)
     block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
                                  args.orig_dim, args.proj_dim, for_block=True)
-    if args.n_gpu > 1:
-        query_model = nn.DataParallel(query_model)
-        block_model = nn.DataParallel(block_model)
+    # if args.n_gpu > 1:
+    #     query_model = nn.DataParallel(query_model)
+    #     block_model = nn.DataParallel(block_model)
     query_model.to(args.device)
     block_model.to(args.device)
 
