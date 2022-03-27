@@ -102,17 +102,26 @@ python preprocess_generated_query.py
 This script simply combines generated querys from GPT-2 model into single file, which is originally stored in different files.
 
 ```
+python convert_query_to_url.py --split train --model retriever/text_title_bm25/index-bm25-ngram\=2-hash\=16777216-tokenizer\=simple.npz
+```
+This script finds closest passages for generated querys in training set using BM25 criterion.
+
+```
 python fuse_segment_passage.py --split train --model retriever/text_title_bm25/index-bm25-ngram\=2-hash\=16777216-tokenizer\=simple.npz
 ```
 This command fuses table segments in training set with their linked passages into fused blocks.
 
-### Step2-3: Train the three modules in the reader.
+### Step2-3: Generate training data for the retriever
 ```
-python train_stage12.py --do_lower_case --do_train --train_file preprocessed_data/stage1_training_data.json --learning_rate 2e-6 --option stage1 --num_train_epochs 3.0 --model_name_or_path bert-large-uncased
-python train_stage12.py --do_lower_case --do_train --train_file preprocessed_data/stage2_training_data.json --learning_rate 5e-6 --option stage2 --num_train_epochs 3.0 --model_name_or_path bert-large-uncased
-python train_stage3.py --do_train  --do_lower_case   --train_file preprocessed_data/stage3_training_data.json  --per_gpu_train_batch_size 12   --learning_rate 3e-5   --num_train_epochs 4.0   --max_seq_length 384   --doc_stride 128  --threads 8 --model_name_or_path bert-large-uncased
+python ICT_preprocess.py
 ```
-The three commands separately train the step1, step2 and step3 neural modules, all of them are based on BERT-uncased-base model from HugginFace implementation.
+It creates pseudo-training data for dense retrieval.
+
+### Step2-4: Train the fused block retriever
+```
+python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 512
+```
+First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 
 ## Step3: Evaluation
 ### Step3-1: Reconstruct Hyperlinked Table using built text title index

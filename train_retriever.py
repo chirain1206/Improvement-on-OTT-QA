@@ -147,9 +147,10 @@ if __name__ == '__main__':
     if not os.path.exists(args.output_dir_block):
         os.makedirs(args.output_dir_block)
 
-    device = torch.device("cuda:0")
+    query_device = torch.device("cuda:1")
+    block_device = torch.device("cuda:0")
     args.n_gpu = torch.cuda.device_count()
-    args.device = device
+    args.device = block_device
 
     # Setup logging
     logging.basicConfig(
@@ -189,8 +190,8 @@ if __name__ == '__main__':
     # if args.n_gpu > 1:
     #     query_model = nn.DataParallel(query_model)
     #     block_model = nn.DataParallel(block_model)
-    query_model.to(args.device)
-    block_model.to(args.device)
+    query_model.to(query_device)
+    block_model.to(block_device)
 
     with open(args.train_file, 'r') as f:
         train_data = json.load(f)
