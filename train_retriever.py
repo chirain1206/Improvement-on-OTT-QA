@@ -147,10 +147,9 @@ if __name__ == '__main__':
     if not os.path.exists(args.output_dir_block):
         os.makedirs(args.output_dir_block)
 
-    query_device = torch.device("cuda:1")
-    block_device = torch.device("cuda:0")
+    device = torch.device("cuda:0")
     args.n_gpu = torch.cuda.device_count()
-    args.device = block_device
+    args.device = device
 
     # Setup logging
     logging.basicConfig(
@@ -187,11 +186,11 @@ if __name__ == '__main__':
                                  args.orig_dim, args.proj_dim)
     block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
                                  args.orig_dim, args.proj_dim, for_block=True)
-    # if args.n_gpu > 1:
-    #     query_model = nn.DataParallel(query_model)
-    #     block_model = nn.DataParallel(block_model)
-    query_model.to(query_device)
-    block_model.to(block_device)
+    if args.n_gpu > 1:
+        query_model = nn.DataParallel(query_model)
+        block_model = nn.DataParallel(block_model)
+    query_model.to(args.device)
+    block_model.to(args.device)
 
     with open(args.train_file, 'r') as f:
         train_data = json.load(f)
