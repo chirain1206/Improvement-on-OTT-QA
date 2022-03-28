@@ -262,7 +262,10 @@ if __name__ == '__main__':
                 # compute loss and backward population
                 loss = criterion(retrieval_score, label)
                 tr_loss += loss.item()
-                loss.backward()
+                if sub_iteration == query_cls.size()[0] - 1:
+                    loss.backward()
+                else:
+                    loss.backward(retain_graph=True)
 
                 torch.nn.utils.clip_grad_norm_(query_model.parameters(), args.max_grad_norm)
                 query_optimizer.step()
