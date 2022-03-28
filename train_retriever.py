@@ -257,7 +257,7 @@ if __name__ == '__main__':
             for sub_iteration in range(query_cls.size()[0]):
                 cur_query = query_cls[sub_iteration,:].unsqueeze(0)
                 retrieval_score = nn.functional.cosine_similarity(cur_query, block_cls, dim=1).unsqueeze(0)
-                label = torch.Tensor([sub_iteration]).to(args.device)
+                label = torch.LongTensor([sub_iteration]).to(args.device)
 
                 # compute loss and backward population
                 loss = criterion(retrieval_score, label)
