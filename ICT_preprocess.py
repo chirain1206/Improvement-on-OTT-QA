@@ -74,9 +74,11 @@ def generate_pseudo_train_sample(cur_fused_block):
     tokens += ["[PAD]"] * (args.max_query_len - len(tokens))
 
     # truncate query length
-    tokens = tokens[:args.max_query_len]
-    token_type = token_type[:args.max_query_len]
-    token_mask = token_mask[:args.max_query_len]
+    if len(tokens) > args.max_query_len:
+        tokens = tokens[:args.max_query_len]
+        tokens[-1] = '[SEP]'
+        token_type = token_type[:args.max_query_len]
+        token_mask = token_mask[:args.max_query_len]
 
     pseudo_query = [tokens, token_type, token_mask]
 
