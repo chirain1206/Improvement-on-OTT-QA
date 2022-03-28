@@ -20,7 +20,7 @@ console.setFormatter(fmt)
 logger.addHandler(console)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--max_query_len', type=int, default=100)
+parser.add_argument('--max_query_len', type=int, default=128)
 args = parser.parse_args()
 
 PROCESS_TOK = None
@@ -69,9 +69,6 @@ def generate_pseudo_train_sample(cur_fused_block):
     tokens += bert_tokenizer.tokenize(sample_sentence)
     token_type += [1] * (len(tokens) - len(token_type))
     token_mask = [1] * len(tokens)
-    token_type += [0] * (args.max_query_len - len(tokens))
-    token_mask += [0] * (args.max_query_len - len(tokens))
-    tokens += ["[PAD]"] * (args.max_query_len - len(tokens))
 
     # truncate query length
     if len(tokens) > args.max_query_len:

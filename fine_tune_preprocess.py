@@ -21,7 +21,7 @@ console.setFormatter(fmt)
 logger.addHandler(console)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--max_query_len', type=int, default=64)
+parser.add_argument('--max_query_len', type=int, default=128)
 args = parser.parse_args()
 
 def generate_train_sample(trace_question):
@@ -39,16 +39,15 @@ def generate_train_sample(trace_question):
     # preprocess the question
     query_tokens = '[CLS] ' + question + ' [SEP]'
     query_tokens = bert_tokenizer.tokenize(query_tokens)
-    query_types = [0] * args.max_query_len
+    query_types = [0] * len(query_tokens)
     query_masks = [1] * len(query_tokens)
-    query_masks += [0] * (args.max_query_len - len(query_tokens))
-    query_tokens += ['[PAD]'] * (args.max_query_len - len(query_tokens))
 
     # truncate query length
     if len(query_tokens) > args.max_query_len:
-        query_tokens = tokens[:args.max_query_len]
+        query_tokens = query_tokens[:args.max_query_len]
         query_tokens[-1] = '[SEP]'
-        query_masks = token_mask[:args.max_query_len]
+        query_types = query_types[:args.max_query_len]
+        query_masks = query_mask[:args.max_query_len]
 
     query = [query_tokens, query_types, query_masks]
 

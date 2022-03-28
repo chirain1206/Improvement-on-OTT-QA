@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('--model', type=str, required=True)
 parser.add_argument('--option', type=str, default='bm25')
 parser.add_argument('--split', type=str, default='train')
-parser.add_argument('--max_block_len', type=int, default=256)
+parser.add_argument('--max_block_len', type=int, default=512)
 args = parser.parse_args()
 
 # logger.info('Initializing ranker...')
@@ -57,9 +57,6 @@ def fusion(cur_table_name):
                 break
 
         token_mask = [1] * len(tokens)
-        token_type += [0] * (args.max_block_len - len(tokens))
-        token_mask += [0] * (args.max_block_len - len(tokens))
-        tokens += ["[PAD]"] * (args.max_block_len - len(tokens))
 
         # truncate the fused block
         if len(tokens) > args.max_block_len:
