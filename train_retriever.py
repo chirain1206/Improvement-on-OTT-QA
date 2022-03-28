@@ -141,6 +141,9 @@ if __name__ == '__main__':
     args.batch_size = math.ceil(math.sqrt(args.batch_size))
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+    args.output_dir = os.path.join(args.output_dir, datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
     args.output_dir_query = os.path.join(args.output_dir, args.output_dir_query)
     if not os.path.exists(args.output_dir_query):
         os.makedirs(args.output_dir_query)
@@ -220,7 +223,7 @@ if __name__ == '__main__':
     query_optimizer = AdamW(query_optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
     block_optimizer = AdamW(block_optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
 
-    args.num_train_epoches = args.train_steps // (len(dataset) // args.batch_size)
+    args.num_train_epoches = math.ceil(args.train_steps / (len(dataset) // args.batch_size))
     t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
     # epoch_log_step = [i for i in range(0,args.num_train_epoches,math.floor(args.num_train_epoches/4)) if i != 0]
     # epoch_log_step[-1] = args.num_train_epoches

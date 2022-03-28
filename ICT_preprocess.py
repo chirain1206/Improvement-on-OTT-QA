@@ -20,7 +20,7 @@ console.setFormatter(fmt)
 logger.addHandler(console)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--max_query_len', type=int, default=64)
+parser.add_argument('--max_query_len', type=int, default=100)
 args = parser.parse_args()
 
 PROCESS_TOK = None
@@ -72,6 +72,12 @@ def generate_pseudo_train_sample(cur_fused_block):
     token_type += [0] * (args.max_query_len - len(tokens))
     token_mask += [0] * (args.max_query_len - len(tokens))
     tokens += ["[PAD]"] * (args.max_query_len - len(tokens))
+
+    # truncate query length
+    tokens = tokens[:args.max_query_len]
+    token_type = token_type[:args.max_query_len]
+    token_mask = token_mask[:args.max_query_len]
+
     pseudo_query = [tokens, token_type, token_mask]
 
     # return pseudo query and the original block
