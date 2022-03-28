@@ -60,6 +60,13 @@ def fusion(cur_table_name):
         token_type += [0] * (args.max_block_len - len(tokens))
         token_mask += [0] * (args.max_block_len - len(tokens))
         tokens += ["[PAD]"] * (args.max_block_len - len(tokens))
+
+        # truncate the fused block
+        if len(tokens) > args.max_block_len:
+            tokens = tokens[:args.max_block_len]
+            token_type = token_type[:args.max_block_len]
+            token_mask = token_mask[:args.max_block_len]
+
         fused_block_dict[cur_table_name + f'_{row_index}'] = [tokens, token_type, token_mask]
 
     return fused_block_dict
