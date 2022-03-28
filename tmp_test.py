@@ -38,6 +38,29 @@ def set_seed(args):
     if args.n_gpu > 0:
         torch.cuda.manual_seed_all(args.seed)
 
+def pad_collate_fn(data):
+    query_input_tokens, query_input_types, query_input_masks, block_input_tokens, block_input_types, block_input_masks = zip(
+        *data)
+    max_query_len = max([len(_) for _ in query_input_tokens])
+    max_block_len = max([len(_) for _ in block_input_tokens])
+    for i in range(len(query_input_tokens)):
+        query_input_tokens[i] += [0] * (max_query_len - len(query_input_tokens[i]))
+        query_input_types[i] += [0] * (max_query_len - len(query_input_types[i]))
+        query_input_masks[i] += [0] * (max_query_len - len(query_input_masks[i]))
+    for i in range(len(block_input_tokens)):
+        block_input_tokens[i] += [0] * (max_block_len - len(block_input_tokens[i]))
+        block_input_types[i] += [0] * (max_block_len - len(block_input_types[i]))
+        block_input_masks[i] += [0] * (max_block_len - len(block_input_masks[i]))
+
+    query_input_tokens = torch.LongTensor(query_input_tokens)
+    query_input_types = torch.LongTensor(query_input_types)
+    query_input_masks = torch.LongTensor(query_input_masks)
+    block_input_tokens = torch.LongTensor(block_input_tokens)
+    block_input_types = torch.LongTensor(block_input_types)
+    block_input_masks = torch.LongTensor(block_input_masks)
+
+    return (query_input_tokens, query_input_types, query_input_masks, block_input_tokens, block_input_types, block_input_masks)
+
 class VectorizeModel(PretrainedModel):
     def __init__(self, model_class, model_name_or_path, config, tokenizer_len, cache_dir, orig_dim, proj_dim,
                  for_block=False):
@@ -80,12 +103,12 @@ class retrieverDataset(Dataset):
 
         query_tokens = item[0][0]
         fused_block_tokens = item[1][0]
-        query_input_tokens = torch.LongTensor(self.query_tokenizer.convert_tokens_to_ids(query_tokens))
-        query_input_types = torch.LongTensor(item[0][1])
-        query_input_masks = torch.LongTensor(item[0][2])
-        block_input_tokens = torch.LongTensor(self.block_tokenizer.convert_tokens_to_ids(fused_block_tokens))
-        block_input_types = torch.LongTensor(item[1][1])
-        block_input_masks = torch.LongTensor(item[1][2])
+        query_input_tokens = self.query_tokenizer.convert_tokens_to_ids(query_tokens)
+        query_input_types = item[0][1]
+        query_input_masks = item[0][2]
+        block_input_tokens = self.block_tokenizer.convert_tokens_to_ids(fused_block_tokens)
+        block_input_types = item[1][1]
+        block_input_masks = item[1][2]
 
         # return query and ground-truth fused block (they have the forms (input_ids, token_types, token_masks))
         return query_input_tokens, query_input_types, query_input_masks, block_input_tokens, block_input_types, block_input_masks
@@ -98,7 +121,7 @@ if __name__ == '__main__':
         default=None,
         type=str,
         required=True,
-        help="ICT or train",
+        help="ICT or fine_tune",
     )
     parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
     parser.add_argument("--adam_epsilon", default=1e-8, type=float, help="Epsilon for Adam optimizer.")
@@ -141,6 +164,12 @@ if __name__ == '__main__':
         default="bert-base-uncased",
         type=str,
         help="Path to pre-trained model or shortcut name selected in the list"
+    )
+    parser.add_argument(
+        "--load_model_path",
+        default="",
+        type=str,
+        help="Path to the model that have been trained"
     )
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     args = parser.parse_args()
@@ -193,10 +222,14 @@ if __name__ == '__main__':
     args.orig_dim = block_config.hidden_size
     args.proj_dim = 128
 
-    query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer), args.cache_dir,
-                                 args.orig_dim, args.proj_dim)
-    block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
-                                 args.orig_dim, args.proj_dim, for_block=True)
+    if len(args.load_model_path) == 0:
+        query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer), args.cache_dir,
+                                     args.orig_dim, args.proj_dim)
+        block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
+                                     args.orig_dim, args.proj_dim, for_block=True)
+    if args.n_gpu > 1:
+        query_model = nn.DataParallel(query_model)
+        block_model = nn.DataParallel(block_model)
     query_model.to(args.device)
     block_model.to(args.device)
 
@@ -204,7 +237,8 @@ if __name__ == '__main__':
         train_data = json.load(f)
     dataset = retrieverDataset(train_data, query_tokenizer, block_tokenizer, shuffle=False)
     sampler = RandomSampler(dataset)
-    loader = DataLoader(dataset, batch_size=args.batch_size, sampler=sampler, num_workers=8, pin_memory=True, drop_last=True)
+    loader = DataLoader(dataset, batch_size=args.batch_size, sampler=sampler, num_workers=8, pin_memory=True,
+                        collate_fn=pad_collate_fn, drop_last=True)
     print("Dataset Size = {}. Loader Size = {}".format(len(dataset), len(loader)))
 
     tb_writer = SummaryWriter(log_dir=args.output_dir)
@@ -229,8 +263,6 @@ if __name__ == '__main__':
 
     args.num_train_epoches = math.ceil(args.train_steps / (len(dataset) // args.batch_size))
     t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
-    # epoch_log_step = [i for i in range(0,args.num_train_epoches,math.floor(args.num_train_epoches/4)) if i != 0]
-    # epoch_log_step[-1] = args.num_train_epoches
 
     query_scheduler = get_linear_schedule_with_warmup(
         query_optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
@@ -253,5 +285,4 @@ if __name__ == '__main__':
     for epoch in train_iterator:
         for step, batch in enumerate(tqdm(loader, desc="Iteration")):
             continue
-
     tb_writer.close()
