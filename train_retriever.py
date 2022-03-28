@@ -24,6 +24,13 @@ from torch.utils.data import DataLoader, Dataset, RandomSampler
 import math
 from train_stage12 import PretrainedModel
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+fmt = logging.Formatter('%(asctime)s: [ %(message)s ]', '%m/%d/%Y %I:%M:%S %p')
+console = logging.StreamHandler()
+console.setFormatter(fmt)
+logger.addHandler(console)
+
 def set_seed(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -281,9 +288,11 @@ if __name__ == '__main__':
                 global_step += 1
                 # Log metrics
                 if args.logging_steps > 0 and global_step % args.logging_steps == 0:
-                    tb_writer.add_scalar("{}_lr".format('train'), scheduler.get_last_lr()[0], global_step)
+                    tb_writer.add_scalar("{}_query_lr".format('train'), query_scheduler.get_last_lr()[0], global_step)
+                    tb_writer.add_scalar("{}_block_lr".format('train'), block_scheduler.get_last_lr()[0], global_step)
                     tb_writer.add_scalar("{}_loss".format('train'), (tr_loss - logging_loss) / args.logging_steps, global_step)
                     logging_loss = tr_loss
+                    logger.info('Current loss: %.3f' % ((tr_loss - logging_loss) / args.logging_steps))
 
         # if epoch + 1 in epoch_log_step:
         # Save model checkpoint
