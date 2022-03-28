@@ -43,6 +43,15 @@ def pad_collate_fn(data):
         *data)
     max_query_len = max([len(_) for _ in query_input_tokens])
     max_block_len = max([len(_) for _ in block_input_tokens])
+
+    # convert them into list and do manipulation
+    query_input_tokens = list(query_input_tokens)
+    query_input_types = list(query_input_types)
+    query_input_masks = list(query_input_masks)
+    block_input_tokens = list(block_input_tokens)
+    block_input_types = list(block_input_types)
+    block_input_masks = list(block_input_masks)
+
     for i in range(len(query_input_tokens)):
         query_input_tokens[i] += [0] * (max_query_len - len(query_input_tokens[i]))
         query_input_types[i] += [0] * (max_query_len - len(query_input_types[i]))
