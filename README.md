@@ -115,11 +115,16 @@ This command fuses table segments in training set with their linked passages int
 ```
 python ICT_preprocess.py
 ```
-It creates pseudo-training data for dense retrieval.
+It creates ICT training data for dual-encoders.
+
+```
+python fine_tune_preprocess.py
+```
+It creates fine-tune training data for dual-encoders.
 
 ### Step2-4: Train the fused block retriever
 ```
-python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 512
+python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048
 ```
 First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 
