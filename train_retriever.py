@@ -291,8 +291,8 @@ if __name__ == '__main__':
                     tb_writer.add_scalar("{}_query_lr".format('train'), query_scheduler.get_last_lr()[0], global_step)
                     tb_writer.add_scalar("{}_block_lr".format('train'), block_scheduler.get_last_lr()[0], global_step)
                     tb_writer.add_scalar("{}_loss".format('train'), (tr_loss - logging_loss) / args.logging_steps, global_step)
-                    logging_loss = tr_loss
                     logger.info('Current loss: %.3f' % ((tr_loss - logging_loss) / args.logging_steps))
+                    logging_loss = tr_loss
 
         # if epoch + 1 in epoch_log_step:
         # Save model checkpoint
