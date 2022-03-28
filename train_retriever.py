@@ -98,7 +98,7 @@ if __name__ == '__main__':
         default=None,
         type=str,
         required=True,
-        help="ICT or train",
+        help="ICT or fine_tune",
     )
     parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
     parser.add_argument("--adam_epsilon", default=1e-8, type=float, help="Epsilon for Adam optimizer.")
@@ -141,6 +141,12 @@ if __name__ == '__main__':
         default="bert-base-uncased",
         type=str,
         help="Path to pre-trained model or shortcut name selected in the list"
+    )
+    parser.add_argument(
+        "--load_model_path",
+        default="",
+        type=str,
+        help="Path to the model that have been trained"
     )
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     args = parser.parse_args()
@@ -193,10 +199,11 @@ if __name__ == '__main__':
     args.orig_dim = block_config.hidden_size
     args.proj_dim = 128
 
-    query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer), args.cache_dir,
-                                 args.orig_dim, args.proj_dim)
-    block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
-                                 args.orig_dim, args.proj_dim, for_block=True)
+    if len(args.load_model_path) == 0:
+        query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer), args.cache_dir,
+                                     args.orig_dim, args.proj_dim)
+        block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
+                                     args.orig_dim, args.proj_dim, for_block=True)
     if args.n_gpu > 1:
         query_model = nn.DataParallel(query_model)
         block_model = nn.DataParallel(block_model)

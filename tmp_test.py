@@ -251,22 +251,7 @@ if __name__ == '__main__':
 
     train_iterator = trange(0, int(args.num_train_epoches), desc="Epoch")
     for epoch in train_iterator:
-        output_dir_query = os.path.join(args.output_dir_query, "checkpoint-epoch{}".format(epoch))
-        if not os.path.exists(output_dir_query):
-            os.makedirs(output_dir_query)
-        query_model_to_save = query_model.module if hasattr(query_model, "module") else query_model
-        query_model_to_save.save_pretrained(output_dir_query)
-        query_tokenizer.save_pretrained(output_dir_query)
-        torch.save(args, os.path.join(output_dir_query, "training_args.bin"))
-
-        output_dir_block = os.path.join(args.output_dir_block, "checkpoint-epoch{}".format(epoch))
-        if not os.path.exists(output_dir_block):
-            os.makedirs(output_dir_block)
-        block_model_to_save = block_model.module if hasattr(block_model, "module") else block_model
-        block_model_to_save.save_pretrained(output_dir_block)
-        block_tokenizer.save_pretrained(output_dir_block)
-        torch.save(args, os.path.join(output_dir_block, "training_args.bin"))
-
-        break
+        for step, batch in enumerate(tqdm(loader, desc="Iteration")):
+            continue
 
     tb_writer.close()
