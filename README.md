@@ -35,19 +35,14 @@ wget https://opendomainhybridqa.s3-us-west-2.amazonaws.com/all_passages.json
 cd ../
 ```
 This command will download the crawled tables and linked passages from Wikiepdia in a cleaned format.
-## Step1-2: Build inedx for retriever
+## Step1-2: Build index for data preprocessing
 ```
 cd retriever/
 python build_tfidf.py --build_option text_title --out_dir text_title_bm25 --option bm25
-python build_tfidf.py --build_option title_sectitle_schema --out_dir title_sectitle_schema
 ```
 This script will generate index files under retriever/ folder, which are used in the following experiments
 
-## Step2: Training
-### Step2-0: If you want to download the model from [Google Drive](https://drive.google.com/file/d/1a3I2HaOIP_9wES53E5kjbb2ST5IbgrVQ/view?usp=sharing), you can skip the following training procedure.
-```
-unzip models.zip
-```
+## Step2: Data Preprocess
 ### Step2-1: Split training tables into table segments
 ```
 python split_tables.py --split train
@@ -91,16 +86,18 @@ python fine_tune_preprocess.py
 ```
 It creates fine-tune training data for dual-encoders.
 
-### Step2-4: Train the fused block retriever
+## Step3: Data Preprocess
+### Step3-1: Train the fused block retriever
 ```
 python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048
-```
-```
 python train_retriever.py --option fine_tune --do_lower_case --train_file retriever/fine_tune_pretrain_data.json --batch_size 2048
 ```
 First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 
-## Step3: Evaluation
+### Step3-2: Train the single-block reader
+Working on
+
+## Step4: Evaluation
 Working on
 
 ## GPT-2 Link Prediction in Table
