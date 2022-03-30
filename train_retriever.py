@@ -148,7 +148,7 @@ if __name__ == '__main__':
         help="Where do you want to store the pre-trained models downloaded from s3",
     )
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
-    parser.add_argument("--logging_steps", type=int, default=1024, help="Log every X updates steps.")
+    parser.add_argument("--logging_steps", type=int, default=512, help="Log every X updates steps.")
     parser.add_argument("--train_steps", default=10000, type=int, help="Total training steps.")
     parser.add_argument("--batch_size", default=2048, type=int, help="Batch sizes for each iteration.")
     parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
@@ -236,6 +236,11 @@ if __name__ == '__main__':
                                      args.orig_dim, args.proj_dim)
         block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
                                      args.orig_dim, args.proj_dim, for_block=True)
+    else:
+        query_model_path = os.path.join(args.load_model_path, 'query_model', 'checkpoint-epoch0', 'pytorch_model.bin')
+        block_model_path = os.path.join(args.load_model_path, 'block_model', 'checkpoint-epoch0', 'pytorch_model.bin')
+        query_model.load_state_dict(torch.load(query_model_path))
+        block_model.load_state_dict(torch.load(block_model_path))
     if args.n_gpu > 1:
         query_model = nn.DataParallel(query_model)
         block_model = nn.DataParallel(block_model)
