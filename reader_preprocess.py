@@ -53,9 +53,8 @@ def generate_reader_train_sample(trace_question):
         row_token_index = answer_block_tokens.index("[row]")
         start_index, end_index = find_sublst(answer_block_tokens[row_token_index:], answer)
         if start_index != -1:
-            start_index += row_token_index
-            end_index += row_token_index
-            assert answer_block_tokens[start_index:end_index+1] == answer
+            start_index += row_token_index + len(question)
+            end_index += row_token_index + len(question)
             break
 
     if start_index == -1:
@@ -65,6 +64,9 @@ def generate_reader_train_sample(trace_question):
         output_types = [1] * (len(question) - 1) + [0] + answer_block[1][:block_len_limit]
         output_masks = [1] * len(question) + answer_block[2][:block_len_limit]
 
+        assert output_tokens[start_index:end_index + 1] == answer
+        assert len(output_tokens) == len(output_types)
+        assert len(output_types) == len(output_masks)
         return [output_tokens, output_types, output_masks, start_index, end_index]
 
 if __name__ == '__main__':
@@ -91,3 +93,4 @@ if __name__ == '__main__':
         os.makedirs('reader')
     with open('reader/fine_tune_data.json', 'w') as f:
         json.dump(results, f, indent=2)
+    print(f"Sucessfully generate {len(results)} training samples.")
