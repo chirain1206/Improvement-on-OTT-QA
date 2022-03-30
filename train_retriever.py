@@ -343,12 +343,4 @@ if __name__ == '__main__':
         query_tokenizer.save_pretrained(output_dir_query)
         torch.save(args, os.path.join(output_dir_query, "training_args.bin"))
 
-        output_dir_block = os.path.join(args.output_dir_block, "checkpoint-epoch{}".format(epoch))
-        if not os.path.exists(output_dir_block):
-            os.makedirs(output_dir_block)
-        block_model_to_save = block_model.module if hasattr(block_model, "module") else block_model
-        block_model_to_save.save_pretrained(output_dir_block)
-        block_tokenizer.save_pretrained(output_dir_block)
-        torch.save(args, os.path.join(output_dir_block, "training_args.bin"))
-
     tb_writer.close()
