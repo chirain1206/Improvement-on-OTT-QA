@@ -196,7 +196,8 @@ if __name__ == '__main__':
     if not os.path.exists(args.output_dir_block):
         os.makedirs(args.output_dir_block)
 
-    device = torch.device("cuda:0")
+    device = torch.device("cuda:1")
+    device_ids = [1,2,3]
     args.n_gpu = torch.cuda.device_count()
     args.device = device
 
@@ -237,8 +238,8 @@ if __name__ == '__main__':
         block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
                                      args.orig_dim, args.proj_dim, for_block=True)
     if args.n_gpu > 1:
-        query_model = nn.DataParallel(query_model)
-        block_model = nn.DataParallel(block_model)
+        query_model = nn.DataParallel(query_model, device_ids=device_ids)
+        block_model = nn.DataParallel(block_model, device_ids=device_ids)
     query_model.to(args.device)
     block_model.to(args.device)
 
