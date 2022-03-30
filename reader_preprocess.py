@@ -50,12 +50,12 @@ def generate_reader_train_sample(trace_question):
         answer_block_tokens = answer_block[0][:block_len_limit]
 
         # find answer position in the fused block (the answer should not be in title information)
-        row_token_index = answer_block_tokens[0].index("[row]")
-        start_index, end_index = find_sublst(answer_block_tokens[0][row_token_index:], answer)
+        row_token_index = answer_block_tokens.index("[row]")
+        start_index, end_index = find_sublst(answer_block_tokens[row_token_index:], answer)
         if start_index != -1:
             start_index += row_token_index
             end_index += row_token_index
-            assert answer_block_tokens[0][start_index:end_index+1] == answer
+            assert answer_block_tokens[start_index:end_index+1] == answer
             break
 
     if start_index == -1:
