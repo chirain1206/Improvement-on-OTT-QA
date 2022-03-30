@@ -231,12 +231,11 @@ if __name__ == '__main__':
     args.orig_dim = block_config.hidden_size
     args.proj_dim = 128
 
-    if len(args.load_model_path) == 0:
-        query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer), args.cache_dir,
-                                     args.orig_dim, args.proj_dim)
-        block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
-                                     args.orig_dim, args.proj_dim, for_block=True)
-    else:
+    query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer), args.cache_dir,
+                                 args.orig_dim, args.proj_dim)
+    block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
+                                 args.orig_dim, args.proj_dim, for_block=True)
+    if len(args.load_model_path) > 0:
         query_model_path = os.path.join(args.load_model_path, 'query_model', 'checkpoint-epoch0', 'pytorch_model.bin')
         block_model_path = os.path.join(args.load_model_path, 'block_model', 'checkpoint-epoch0', 'pytorch_model.bin')
         query_model.load_state_dict(torch.load(query_model_path))
