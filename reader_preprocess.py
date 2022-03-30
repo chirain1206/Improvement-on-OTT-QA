@@ -10,7 +10,6 @@ import nltk.data
 import drqa.drqa_tokenizers
 import math
 import os
-from multiprocessing.util import Finalize
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -33,18 +32,40 @@ def find_sublst(lst, sublst):
 def generate_reader_train_sample(trace_question):
     question = tokenizer.tokenize('[CLS] ' + trace_question['question'] + ' [SEP]')
     answer_nodes = trace_question['answer-node']
+    answer = tokenizer.tokenize(trace_question['answer-text'])
     table_id = trace_question['table_id']
     used_row = set()
+    start_index = end_index = -1
     for node in answer_nodes:
         answer_row = node[1][0]
-        used_row.add(answer_row)
-        fused_block_name = table_id + f'_{answer_row}'
-        if fused_block_name not in fused_blocks:
+        if answer_row in used_row:
             continue
+        used_row.add(answer_row)
+
+        fused_block_name = table_id + f'_{answer_row}'
+        assert fused_block_name in fused_blocks
+
         answer_block = fused_blocks[fused_block_name]
         block_len_limit = args.max_block_len - len(question)
+        answer_block_tokens = answer_block[0][:block_len_limit]
 
+        # find answer position in the fused block (the answer should not be in title information)
+        row_token_index = answer_block_tokens[0].index("[row]")
+        start_index, end_index = find_sublst(answer_block_tokens[0][row_token_index:], answer)
+        if start_index != -1:
+            start_index += row_token_index
+            end_index += row_token_index
+            assert answer_block_tokens[0][start_index:end_index+1] == answer
+            break
 
+    if start_index == -1:
+        return None
+    else:
+        output_tokens = question + answer_block_tokens
+        output_types = [1] * (len(question) - 1) + [0] + answer_block[1][:block_len_limit]
+        output_masks = [1] * len(question) + answer_block[2][:block_len_limit]
+
+        return [output_tokens, output_types, output_masks, start_index, end_index]
 
 if __name__ == '__main__':
     n_threads = os.cpu_count()
@@ -60,7 +81,7 @@ if __name__ == '__main__':
     with Pool(n_threads) as p:
         results = list(
             tqdm(
-                p.imap_unordered(generate_pseudo_train_sample, data),
+                p.imap_unordered(generate_reader_train_sample, data),
                 total=len(data),
                 desc='Generate training samples for reader',
             )
