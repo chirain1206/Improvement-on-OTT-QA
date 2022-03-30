@@ -148,7 +148,7 @@ if __name__ == '__main__':
         help="Where do you want to store the pre-trained models downloaded from s3",
     )
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
-    parser.add_argument("--logging_steps", type=int, default=1024, help="Log every X updates steps.")
+    parser.add_argument("--logging_steps", type=int, default=10, help="Log every X updates steps.")
     parser.add_argument("--train_steps", default=10000, type=int, help="Total training steps.")
     parser.add_argument("--batch_size", default=2048, type=int, help="Batch sizes for each iteration.")
     parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
