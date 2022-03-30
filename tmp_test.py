@@ -271,7 +271,8 @@ if __name__ == '__main__':
     query_optimizer = AdamW(query_optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
     block_optimizer = AdamW(block_optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
 
-    args.num_train_epoches = math.ceil(args.train_steps / (len(dataset) // args.batch_size))
+    args.num_train_epoches = 200
+    # args.num_train_epoches = math.ceil(args.train_steps / (len(dataset) // args.batch_size))
     t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
 
     query_scheduler = get_linear_schedule_with_warmup(
