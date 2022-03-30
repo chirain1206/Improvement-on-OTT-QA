@@ -33,10 +33,9 @@ def fusion(cur_table_name):
     fused_block_dict = {}
 
     for row_index, row in enumerate(data[cur_table_name]):
-        tokens = ["[CLS]"]
-        tokens += row[0]
+        tokens = row[0]
         lst_type = row[1][-1]
-        token_type = [0] + row[1]
+        token_type = row[1]
 
         # find linked passages
         if cur_table_name + f'_{row_index}' in train_urls:
@@ -70,6 +69,8 @@ def fusion(cur_table_name):
 
 if __name__ == '__main__':
     fused_blocks = {}
+    # one space leave for [CLS] token
+    args.max_block_len = args.max_block_len - 1
 
     n_threads = 64
     if args.split == 'train':

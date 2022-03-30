@@ -36,6 +36,12 @@ def generate_train_sample(trace_question):
     answer_row = Counter(answer_row).most_common(1)[0][0]
     ground_truth_block = fused_blocks[table_id + f'_{answer_row}']
 
+    # add [CLS] token to front of the fused block
+    block_tokens = ["[CLS]"] + ground_truth_block[1][0]
+    block_type = [0] + ground_truth_block[1][1]
+    block_mask = [1] + ground_truth_block[1][2]
+    block_repr = [block_tokens, block_type, block_mask]
+
     # preprocess the question
     query_tokens = '[CLS] ' + question + ' [SEP]'
     query_tokens = bert_tokenizer.tokenize(query_tokens)
@@ -51,7 +57,7 @@ def generate_train_sample(trace_question):
 
     query = [query_tokens, query_types, query_masks]
 
-    return query, ground_truth_block
+    return query, block_repr
 
 if __name__ == '__main__':
     n_threads = os.cpu_count()

@@ -585,7 +585,8 @@ def prepare_stage3_data(data, request_path):
                     context = requested_documents[node[2]]
                     context = 'Title : {} . '.format(node[0]) + context
                     
-                    orig_answer = node[0]
+                    # orig_answer = node[0]
+                    orig_answer = d['answer-text']
 
                     start = context.lower().find(orig_answer.lower())
 

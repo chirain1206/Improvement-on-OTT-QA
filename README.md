@@ -90,7 +90,7 @@ It creates fine-tune training data for dual-encoders.
 ### Step3-1: Train the fused block retriever
 ```
 python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048
-python train_retriever.py --option fine_tune --do_lower_case --train_file retriever/fine_tune_pretrain_data.json --batch_size 2048
+python train_retriever.py --option fine_tune --do_lower_case --train_file retriever/fine_tune_pretrain_data.json --batch_size 2048 --load_model_path retriever/ICT/2022_03_28_15_02_36/
 ```
 First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 

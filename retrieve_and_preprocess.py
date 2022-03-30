@@ -60,34 +60,8 @@ if __name__ == '__main__':
             with open(f'preprocessed_data/{args.split}_linked.json', 'r') as f:
                 train_results = json.load(f)
 
-            results = prepare_stage1_data(train_results, table_path)
-            with open('preprocessed_data/stage1_training_data.json', 'w') as f:
-                json.dump(results, f, indent=2)
-
-
-            results = []
-            with Pool(n_threads) as p:
-                func_ = partial(
-                    prepare_stage2_data,
-                    table_path=table_path,
-                    request_path=request_path
-                )
-                results = list(
-                    tqdm(
-                        p.imap(func_, train_results, chunksize=16),
-                        total=len(train_results),
-                        desc="convert examples to features",
-                    )
-                )
-
-            train_split = []
-            for r1 in results:
-                train_split.extend(r1)
-            with open('preprocessed_data/stage2_training_data.json', 'w') as f:
-                json.dump(train_split, f, indent=2)
-
             results = prepare_stage3_data(train_results, request_path)
-            with open('preprocessed_data/stage3_training_data.json', 'w') as f:
+            with open('preprocessed_data/train_answer_location.json', 'w') as f:
                 json.dump(results, f, indent=2)
             
     elif args.split in ['dev_retrieve', 'test_retrieve']: 

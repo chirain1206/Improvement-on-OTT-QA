@@ -79,8 +79,14 @@ def generate_pseudo_train_sample(cur_fused_block):
 
     pseudo_query = [tokens, token_type, token_mask]
 
+    # add [CLS] token to front of the fused block
+    block_tokens = ["[CLS]"] + cur_fused_block[1][0]
+    block_type = [0] + cur_fused_block[1][1]
+    block_mask = [1] + cur_fused_block[1][2]
+    block_repr = [block_tokens, block_type, block_mask]
+
     # return pseudo query and the original block
-    return pseudo_query, cur_fused_block[1]
+    return pseudo_query, block_repr
 
 if __name__ == '__main__':
     n_threads = os.cpu_count()
@@ -95,7 +101,7 @@ if __name__ == '__main__':
     with open('data/all_passages.json', 'r') as f:
         passages = json.load(f)
 
-    bert_tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True, cache_dir='/tmp/')
+    bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True, cache_dir='/tmp/')
     block_names = list(data.keys())
     random.shuffle(block_names)
     shuffle_data = [[name, data[name]] for name in block_names]
