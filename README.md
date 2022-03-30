@@ -101,7 +101,10 @@ python train_retriever.py --option fine_tune --do_lower_case --train_file retrie
 First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 
 ### Step3-2: Train the single-block reader
-Working on
+```
+python train_retriever.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 24
+```
+This command fine-tunes the single-block reader model.
 
 ## Step4: Evaluation
 Working on

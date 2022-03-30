@@ -87,13 +87,6 @@ class readerDataset(Dataset):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--option",
-        default=None,
-        type=str,
-        required=True,
-        help="ICT or fine_tune",
-    )
     parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
     parser.add_argument("--adam_epsilon", default=1e-8, type=float, help="Epsilon for Adam optimizer.")
     parser.add_argument(
@@ -219,7 +212,7 @@ if __name__ == '__main__':
     for epoch in train_iterator:
         for step, batch in enumerate(tqdm(loader, desc="Iteration")):
             continue
-            
+
         # Save model checkpoint
         output_dir = os.path.join(args.output_dir, "checkpoint-epoch{}".format(epoch))
         if not os.path.exists(output_dir):
