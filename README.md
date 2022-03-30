@@ -86,6 +86,12 @@ python fine_tune_preprocess.py
 ```
 It creates fine-tune training data for dual-encoders.
 
+### Step2-4: Generate training data for the reader
+```
+python reader_preprocess.py
+```
+It creates fine-tune data for the single-block reader.
+
 ## Step3: Data Preprocess
 ### Step3-1: Train the fused block retriever
 ```
