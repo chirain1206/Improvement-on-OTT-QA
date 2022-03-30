@@ -184,23 +184,32 @@ if __name__ == '__main__':
     print("Dataset Size = {}. Loader Size = {}".format(len(dataset), len(loader)))
 
     tb_writer = SummaryWriter(log_dir=args.output_dir)
+
     # Prepare optimizer and schedule (linear warmup and decay)
-    no_decay = ["bias", "LayerNorm.weight"]
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in query_model.named_parameters() if not any(nd in n for nd in no_decay)],
-            "weight_decay": args.weight_decay,
-        },
-        {"params": [p for n, p in query_model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
-    ]
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
+    args.num_train_epoches = 2
+    # Check if saved optimizer or scheduler states exist
+    if os.path.isfile(os.path.join(args.load_model_path, "optimizer.pt")) and os.path.isfile(
+        os.path.join(args.load_model_path, "scheduler.pt")
+    ):
+        # Load in optimizer and scheduler states
+        optimizer.load_state_dict(torch.load(os.path.join(args.load_model_path, "optimizer.pt")))
+        scheduler.load_state_dict(torch.load(os.path.join(args.load_model_path, "scheduler.pt")))
+    else:
+        no_decay = ["bias", "LayerNorm.weight"]
+        optimizer_grouped_parameters = [
+            {
+                "params": [p for n, p in query_model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay": args.weight_decay,
+            },
+            {"params": [p for n, p in query_model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
+        ]
+        optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
 
-    args.num_train_epoches = 1
-    t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size #!!!
+        t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
 
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
-    )
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
+        )
 
     global_step = 0
     tr_loss, logging_loss = 0.0, 0.0
