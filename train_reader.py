@@ -218,8 +218,38 @@ if __name__ == '__main__':
     train_iterator = trange(0, int(args.num_train_epoches), desc="Epoch")
     for epoch in train_iterator:
         for step, batch in enumerate(tqdm(loader, desc="Iteration")):
-            continue
-            
+            batch = tuple(Variable(t).to(args.device) for t in batch)
+            inputs = {
+                "input_ids": batch[0],
+                "attention_mask": batch[1],
+                "token_type_ids": batch[2],
+                "start_positions": batch[3],
+                "end_positions": batch[4],
+            }
+
+            outputs = model(**inputs)
+            loss = outputs[0]
+
+            # if args.n_gpu > 1:
+            #     loss = loss.mean()  # mean() to average on multi-gpu parallel (not distributed) training
+            tr_loss += loss.item()
+            loss.backward()
+
+            torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
+            optimizer.step()
+            scheduler.step()
+
+            model.zero_grad()
+
+            global_step += 1
+            # Log metrics
+            if args.logging_steps > 0 and global_step % args.logging_steps == 0:
+                tb_writer.add_scalar("{}_lr".format('train'), scheduler.get_last_lr()[0], global_step)
+                tb_writer.add_scalar("{}_loss".format('train'), (tr_loss - logging_loss) / args.logging_steps, global_step)
+                logger.info('Current learning rate: %.8f' % scheduler.get_last_lr()[0])
+                logger.info('Current loss: %.3f' % ((tr_loss - logging_loss) / args.logging_steps))
+                logging_loss = tr_loss
+
         # Save model checkpoint
         output_dir = os.path.join(args.output_dir, "checkpoint-epoch{}".format(epoch))
         if not os.path.exists(output_dir):
