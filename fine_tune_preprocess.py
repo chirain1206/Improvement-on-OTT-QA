@@ -37,9 +37,9 @@ def generate_train_sample(trace_question):
     ground_truth_block = fused_blocks[table_id + f'_{answer_row}']
 
     # add [CLS] token to front of the fused block
-    block_tokens = ["[CLS]"] + ground_truth_block[1][0]
-    block_type = [0] + ground_truth_block[1][1]
-    block_mask = [1] + ground_truth_block[1][2]
+    block_tokens = ["[CLS]"] + ground_truth_block[0]
+    block_type = [0] + ground_truth_block[1]
+    block_mask = [1] + ground_truth_block[2]
     block_repr = [block_tokens, block_type, block_mask]
 
     # preprocess the question
