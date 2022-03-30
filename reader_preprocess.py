@@ -88,12 +88,12 @@ if __name__ == '__main__':
                 desc='Generate training samples for reader',
             )
         )
+    # filter out questions without answers
+    results = [cur_question for cur_question in results if cur_question != None]
 
     if not os.path.exists('reader'):
         os.makedirs('reader')
     with open('reader/fine_tune_data.json', 'w') as f:
         json.dump(results, f, indent=2)
 
-    # filter out questions without answers
-    results = [cur_question for cur_question in results if cur_question != None]
     print(f"Sucessfully generate {len(results)} training samples.")
