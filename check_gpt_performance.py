@@ -41,7 +41,7 @@ if __name__ == '__main__':
         i += 1
         table_name = name[:name.rfind('_')]
         row_index = int(name[name.rfind('_')+1:])
-        with open(f'data/traindev_tables_tok/{table_name}', 'r') as f:
+        with open(f'data/traindev_tables_tok/{table_name}.json', 'r') as f:
             cur_table = json.load(f)
         row_data = []
         ground_truth_links = []
