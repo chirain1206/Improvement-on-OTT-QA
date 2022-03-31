@@ -92,7 +92,7 @@ python reader_preprocess.py
 ```
 It creates fine-tune data for the single-block reader.
 
-## Step3: Data Preprocess
+## Step3: Training of models
 ### Step3-1: Train the fused block retriever
 ```
 python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048
