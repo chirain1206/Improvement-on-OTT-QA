@@ -119,6 +119,10 @@ To generate links, please run
 python link_prediction.py --do_all --load_from link_generator/model-ep9.pt --dataset data/all_plain_tables.json --batch_size 256 --shard [current_iteration]@[total_iteration_number]
 ```
 This command will generate all the link mapping in the link_generator/ folder.
+```
+python check_gpt_performance.py --evaluation_size 10000
+```
+This command provides a simple evaluation to the accuracy of prediction.
 
 ## Reference
 If you find this project useful, please cite it using the following format
