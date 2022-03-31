@@ -1,16 +1,9 @@
-from drqa import retriever
-from tqdm import tqdm
-from transformers import BertTokenizer
-from multiprocessing import Pool
 import argparse
 import logging
 import json
 import random
-import nltk.data
-import drqa.drqa_tokenizers
-import math
 import os
-from multiprocessing.util import Finalize
+import sys
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
