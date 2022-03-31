@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     block_names = list(data.keys())
     random.shuffle(block_names)
-    block_names = block_names[:args.test_size]
+    block_names = block_names[:args.evaluation_size]
     num_ground_truth_links = 0
     num_predict_correct = 0
     i = 0
