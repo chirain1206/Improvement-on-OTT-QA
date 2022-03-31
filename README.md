@@ -27,7 +27,7 @@ pip install pexpect
 ```
 
 ## Step1: Preliminary Step
-## Step1-1: Download the necessary files 
+### Step1-1: Download the necessary files 
 ```
 cd data/
 wget https://opendomainhybridqa.s3-us-west-2.amazonaws.com/all_plain_tables.json
@@ -35,7 +35,7 @@ wget https://opendomainhybridqa.s3-us-west-2.amazonaws.com/all_passages.json
 cd ../
 ```
 This command will download the crawled tables and linked passages from Wikiepdia in a cleaned format.
-## Step1-2: Build index for data preprocessing
+### Step1-2: Build index for data preprocessing
 ```
 cd retriever/
 python build_tfidf.py --build_option text_title --out_dir text_title_bm25 --option bm25
