@@ -43,7 +43,7 @@ parser.add_argument(
 parser.add_argument(
     "--do_lower_case",
     default=True,
-    action=store_true,
+    action="store_true",
     help="Path to the file includes candidate fused blocks",
 )
 args = parser.parse_args()
