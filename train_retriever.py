@@ -24,13 +24,6 @@ from torch.utils.data import DataLoader, Dataset, RandomSampler
 import math
 from train_stage12 import PretrainedModel
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-fmt = logging.Formatter('%(asctime)s: [ %(message)s ]', '%m/%d/%Y %I:%M:%S %p')
-console = logging.StreamHandler()
-console.setFormatter(fmt)
-logger.addHandler(console)
-
 def set_seed(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -122,7 +115,14 @@ class retrieverDataset(Dataset):
         # return query and ground-truth fused block (they have the forms (input_ids, token_types, token_masks))
         return query_input_tokens, query_input_types, query_input_masks, block_input_tokens, block_input_types, block_input_masks
 
-if __name__ == '__main__':
+def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    fmt = logging.Formatter('%(asctime)s: [ %(message)s ]', '%m/%d/%Y %I:%M:%S %p')
+    console = logging.StreamHandler()
+    console.setFormatter(fmt)
+    logger.addHandler(console)
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -372,3 +372,6 @@ if __name__ == '__main__':
         torch.save(block_scheduler.state_dict(), os.path.join(output_dir_block, "scheduler.pt"))
 
     tb_writer.close()
+
+if __name__ == '__main__':
+    main()

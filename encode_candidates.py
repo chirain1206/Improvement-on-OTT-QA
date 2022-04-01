@@ -7,6 +7,7 @@ from transformers import (BertConfig, BertTokenizer, BertModel)
 import torch
 from torch import nn
 from train_stage12 import PretrainedModel
+from train_retriever import VectorizeModel
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -52,28 +53,28 @@ device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
 args.device = device
 
-class VectorizeModel(PretrainedModel):
-    def __init__(self, model_class, model_name_or_path, config, tokenizer_len, cache_dir, orig_dim, proj_dim,
-                 for_block=False):
-        super(VectorizeModel, self).__init__()
-
-        self.base = model_class.from_pretrained(
-            model_name_or_path,
-            from_tf=bool(".ckpt" in model_name_or_path),
-            config=config,
-            cache_dir=cache_dir if cache_dir else None,
-        )
-        if for_block:
-            self.base.resize_token_embeddings(tokenizer_len)
-        self.projection = nn.Linear(orig_dim, proj_dim)
-
-    def forward(self, input_tokens, input_types, input_masks):
-        inputs = {"input_ids": input_tokens, "token_type_ids": input_types, "attention_mask": input_masks}
-        _, cls_representation = self.base(**inputs)
-        proj_cls = self.projection(cls_representation)
-
-        # return tensor in [batch_size, proj_dim]
-        return proj_cls
+# class VectorizeModel(PretrainedModel):
+#     def __init__(self, model_class, model_name_or_path, config, tokenizer_len, cache_dir, orig_dim, proj_dim,
+#                  for_block=False):
+#         super(VectorizeModel, self).__init__()
+#
+#         self.base = model_class.from_pretrained(
+#             model_name_or_path,
+#             from_tf=bool(".ckpt" in model_name_or_path),
+#             config=config,
+#             cache_dir=cache_dir if cache_dir else None,
+#         )
+#         if for_block:
+#             self.base.resize_token_embeddings(tokenizer_len)
+#         self.projection = nn.Linear(orig_dim, proj_dim)
+#
+#     def forward(self, input_tokens, input_types, input_masks):
+#         inputs = {"input_ids": input_tokens, "token_type_ids": input_types, "attention_mask": input_masks}
+#         _, cls_representation = self.base(**inputs)
+#         proj_cls = self.projection(cls_representation)
+#
+#         # return tensor in [batch_size, proj_dim]
+#         return proj_cls
 
 if __name__ == '__main__':
     block_config = BertConfig.from_pretrained(
@@ -104,23 +105,22 @@ if __name__ == '__main__':
     BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
 
 
-    # for candidate_name in IDX2BLOCK:
-    # tokens, token_type, token_mask = candidates[candidate_name]
-    tokens, token_type, token_mask = candidates[IDX2BLOCK[0]]
+    for candidate_name in IDX2BLOCK:
+        tokens, token_type, token_mask = candidates[candidate_name]
 
-    # add [CLS] token to front of the fused block
-    tokens = ["[CLS]"] + tokens
-    tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
-    type = torch.LongTensor([[0] + token_type]).to(args.device)
-    mask = torch.LongTensor([[1] + token_mask]).to(args.device)
+        # add [CLS] token to front of the fused block
+        tokens = ["[CLS]"] + tokens
+        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
+        type = torch.LongTensor([[0] + token_type]).to(args.device)
+        mask = torch.LongTensor([[1] + token_mask]).to(args.device)
 
-    # torch.Size([1, 128])
-    candidate_vec = block_model(tokens, type, mask)
+        # torch.Size([1, 128])
+        candidate_vec = block_model(tokens, type, mask)
 
-    if candidate_matrix == None:
-        candidate_matrix = candidate_vec
-    else:
-        candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
+        if candidate_matrix == None:
+            candidate_matrix = candidate_vec
+        else:
+            candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
 
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
 

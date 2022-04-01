@@ -7,6 +7,7 @@ import random
 from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel)
 from torch import nn
+from train_retriever import VectorizeModel
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
