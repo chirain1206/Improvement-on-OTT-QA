@@ -3,7 +3,6 @@ import logging
 import json
 import os
 import sys
-from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel)
 import torch
 from torch import nn
@@ -51,6 +50,29 @@ args = parser.parse_args()
 device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
 args.device = device
+
+class VectorizeModel(PretrainedModel):
+    def __init__(self, model_class, model_name_or_path, config, tokenizer_len, cache_dir, orig_dim, proj_dim,
+                 for_block=False):
+        super(VectorizeModel, self).__init__()
+
+        self.base = model_class.from_pretrained(
+            model_name_or_path,
+            from_tf=bool(".ckpt" in model_name_or_path),
+            config=config,
+            cache_dir=cache_dir if cache_dir else None,
+        )
+        if for_block:
+            self.base.resize_token_embeddings(tokenizer_len)
+        self.projection = nn.Linear(orig_dim, proj_dim)
+
+    def forward(self, input_tokens, input_types, input_masks):
+        inputs = {"input_ids": input_tokens, "token_type_ids": input_types, "attention_mask": input_masks}
+        _, cls_representation = self.base(**inputs)
+        proj_cls = self.projection(cls_representation)
+
+        # return tensor in [batch_size, proj_dim]
+        return proj_cls
 
 if __name__ == '__main__':
     block_config = BertConfig.from_pretrained(
