@@ -3,13 +3,9 @@ import logging
 import json
 import os
 import sys
-from .train_retriever import VectorizeModel
+from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel)
 import torch
-
-current_path = os.path.dirname(os.path.abspath(__file__))
-
-sys.path.append(os.path.dirname(current_path))
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -97,4 +93,4 @@ if __name__ == '__main__':
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
 
     save_data = {"IDX2BLOCK":IDX2BLOCK, "BLOCK2IDX":BLOCK2IDX, "candidate_matrix":candidate_matrix}
-    torch.save(save_data, '../preprocessed_data/dev_candidates.pth')
+    torch.save(save_data, 'preprocessed_data/dev_candidates.pth')
