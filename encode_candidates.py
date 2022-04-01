@@ -50,31 +50,27 @@ parser.add_argument(
 )
 args = parser.parse_args()
 device = torch.device("cuda:0")
-args.n_gpu = torch.cuda.device_count()
 args.device = device
 
-# class VectorizeModel(PretrainedModel):
-#     def __init__(self, model_class, model_name_or_path, config, tokenizer_len, cache_dir, orig_dim, proj_dim,
-#                  for_block=False):
-#         super(VectorizeModel, self).__init__()
-#
-#         self.base = model_class.from_pretrained(
-#             model_name_or_path,
-#             from_tf=bool(".ckpt" in model_name_or_path),
-#             config=config,
-#             cache_dir=cache_dir if cache_dir else None,
-#         )
-#         if for_block:
-#             self.base.resize_token_embeddings(tokenizer_len)
-#         self.projection = nn.Linear(orig_dim, proj_dim)
-#
-#     def forward(self, input_tokens, input_types, input_masks):
-#         inputs = {"input_ids": input_tokens, "token_type_ids": input_types, "attention_mask": input_masks}
-#         _, cls_representation = self.base(**inputs)
-#         proj_cls = self.projection(cls_representation)
-#
-#         # return tensor in [batch_size, proj_dim]
-#         return proj_cls
+class candidatesDataset(Dataset):
+    def __init__(self, data, block_tokenizer):
+        super(retrieverDataset, self).__init__()
+        self.data = data
+        self.block_tokenizer = block_tokenizer
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        tokens, token_type, token_mask = self.data[index]
+
+        # add [CLS] token to front of the fused block
+        tokens = ["[CLS]"] + tokens
+        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)])
+        type = torch.LongTensor([[0] + token_type])
+        mask = torch.LongTensor([[1] + token_mask])
+
+        return tokens, type, mask
 
 if __name__ == '__main__':
     block_config = BertConfig.from_pretrained(
@@ -93,8 +89,6 @@ if __name__ == '__main__':
                                  args.orig_dim, args.proj_dim, for_block=True)
     block_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
     block_model.load_state_dict(torch.load(block_model_path))
-    if args.n_gpu > 1:
-        block_model = nn.DataParallel(block_model)
     block_model.to(args.device)
     candidate_matrix = None
 
@@ -102,17 +96,14 @@ if __name__ == '__main__':
         candidates = json.load(f)
 
     IDX2BLOCK = list(candidates.keys())
+    data = list(candidates.values())
     BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
 
+    dataset = retrieverDataset(data, block_tokenizer)
+    loader = DataLoader(dataset, batch_size=1, num_workers=8, pin_memory=True, drop_last=False)
 
-    for candidate_name in IDX2BLOCK:
-        tokens, token_type, token_mask = candidates[candidate_name]
-
-        # add [CLS] token to front of the fused block
-        tokens = ["[CLS]"] + tokens
-        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
-        type = torch.LongTensor([[0] + token_type]).to(args.device)
-        mask = torch.LongTensor([[1] + token_mask]).to(args.device)
+    for batch in tqdm(loader, desc="Iteration"):
+        tokens, token_type, token_mask = tuple(Variable(t).to(args.device) for t in batch)
 
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, type, mask)
