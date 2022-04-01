@@ -72,6 +72,8 @@ class candidateDataset(Dataset):
         type = torch.LongTensor([[0] + token_type])
         mask = torch.LongTensor([[1] + token_mask])
 
+        assert tokens.size()[1] == type.size()[1] and type.size()[1] == mask.size()[1]
+
         return tokens, type, mask
 
 if __name__ == '__main__':
