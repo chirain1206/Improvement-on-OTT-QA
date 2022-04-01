@@ -114,8 +114,8 @@ if __name__ == '__main__':
 
         if candidate_matrix == None:
             candidate_matrix = candidate_vec
-        else:
-            candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
+        # else:
+        #     candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
 
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
 
