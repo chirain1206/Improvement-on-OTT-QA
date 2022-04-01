@@ -111,10 +111,10 @@ if __name__ == '__main__':
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, token_type, token_mask)
 
-        if candidate_matrix == None:
-            candidate_matrix = candidate_vec
-        else:
-            candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
+        # if candidate_matrix == None:
+        #     candidate_matrix = candidate_vec
+        # else:
+        #     candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
 
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
 
