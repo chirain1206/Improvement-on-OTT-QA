@@ -105,7 +105,7 @@ if __name__ == '__main__':
     loader = DataLoader(dataset, batch_size=1, num_workers=8, pin_memory=True, drop_last=False)
 
     for batch in tqdm(loader, desc="Iteration"):
-        tokens, token_type, token_mask = tuple(Variable(t).to(args.device) for t in batch)
+        tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
 
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, type, mask)
