@@ -172,7 +172,7 @@ if __name__ == '__main__':
     model.resize_token_embeddings(len(tokenizer))
 
     if len(args.load_model_path) > 0:
-        model_path = os.path.join(args.load_model_path, 'checkpoint-epoch0', 'pytorch_model.bin')
+        model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
         model.load_state_dict(torch.load(model_path))
     # if args.n_gpu > 1:
     #     model = nn.DataParallel(model)
