@@ -55,7 +55,7 @@ args.device = device
 
 class candidateDataset(Dataset):
     def __init__(self, data, block_tokenizer):
-        super(retrieverDataset, self).__init__()
+        super(candidateDataset, self).__init__()
         self.data = data
         self.block_tokenizer = block_tokenizer
 
