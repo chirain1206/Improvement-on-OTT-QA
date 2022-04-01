@@ -9,6 +9,7 @@ from torch import nn
 from train_stage12 import PretrainedModel
 from train_retriever import VectorizeModel
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
