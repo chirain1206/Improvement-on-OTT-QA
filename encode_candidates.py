@@ -48,9 +48,9 @@ parser.add_argument(
     help="Path to the file includes candidate fused blocks",
 )
 args = parser.parse_args()
-# device = torch.device("cuda:0")
-# args.n_gpu = torch.cuda.device_count()
-# args.device = device
+device = torch.device("cuda:0")
+args.n_gpu = torch.cuda.device_count()
+args.device = device
 
 if __name__ == '__main__':
     block_config = BertConfig.from_pretrained(
