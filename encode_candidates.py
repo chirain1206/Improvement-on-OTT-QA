@@ -103,22 +103,24 @@ if __name__ == '__main__':
     IDX2BLOCK = list(candidates.keys())
     BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
 
-    for candidate_name in IDX2BLOCK:
-        tokens, token_type, token_mask = candidates[candidate_name]
 
-        # add [CLS] token to front of the fused block
-        tokens = ["[CLS]"] + tokens
-        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
-        type = torch.LongTensor([[0] + token_type]).to(args.device)
-        mask = torch.LongTensor([[1] + token_mask]).to(args.device)
+    # for candidate_name in IDX2BLOCK:
+    # tokens, token_type, token_mask = candidates[candidate_name]
+    tokens, token_type, token_mask = candidates[IDX2BLOCK[0]]
 
-        # torch.Size([1, 128])
-        candidate_vec = block_model(tokens, type, mask)
+    # add [CLS] token to front of the fused block
+    tokens = ["[CLS]"] + tokens
+    tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
+    type = torch.LongTensor([[0] + token_type]).to(args.device)
+    mask = torch.LongTensor([[1] + token_mask]).to(args.device)
 
-        if candidate_matrix == None:
-            candidate_matrix = candidate_vec
-        else:
-            candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
+    # torch.Size([1, 128])
+    candidate_vec = block_model(tokens, type, mask)
+
+    if candidate_matrix == None:
+        candidate_matrix = candidate_vec
+    else:
+        candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
 
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
 
