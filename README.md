@@ -95,14 +95,14 @@ It creates fine-tune data for the single-block reader.
 ## Step3: Training of models
 ### Step3-1: Train the fused block retriever
 ```
-python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048
+python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048 --learning_rate 1e-5 --train_steps 10000
 python train_retriever.py --option fine_tune --do_lower_case --train_file retriever/fine_tune_pretrain_data.json --batch_size 2048 --load_model_path retriever/ICT/2022_03_28_15_02_36/
 ```
 First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 
 ### Step3-2: Train the single-block reader
 ```
-python train_reader.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 24
+python train_reader.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 24 --learning_rate 1e-5 --num_train_epoches 10
 ```
 This command fine-tunes the single-block reader model.
 
