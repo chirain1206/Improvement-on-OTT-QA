@@ -65,39 +65,39 @@ if __name__ == '__main__':
     block_tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
     args.orig_dim = block_config.hidden_size
     args.proj_dim = 128
-    block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
-                                 args.orig_dim, args.proj_dim, for_block=True)
-    block_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
-    block_model.load_state_dict(torch.load(block_model_path))
-    if args.n_gpu > 1:
-        block_model = nn.DataParallel(block_model)
-    block_model.to(args.device)
-    candidate_matrix = None
-
-    with open(args.candidates_file, 'r') as f:
-        candidates = json.load(f)
-
-    IDX2BLOCK = list(candidates.keys())
-    BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
-
-    for candidate_name in IDX2BLOCK:
-        tokens, token_type, token_mask = candidates[candidate_name]
-
-        # add [CLS] token to front of the fused block
-        tokens = ["[CLS]"] + tokens
-        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
-        type = torch.LongTensor([[0] + token_type]).to(args.device)
-        mask = torch.LongTensor([[1] + token_mask]).to(args.device)
-
-        # torch.Size([1, 128])
-        candidate_vec = block_model(tokens, type, mask)
-
-        if candidate_matrix == None:
-            candidate_matrix = candidate_vec
-        else:
-            candidate_matrix = torch.cat(candidate_matrix, candidate_vec)
-
-    assert candidate_matrix.size()[0] == len(IDX2BLOCK)
-
-    save_data = {"IDX2BLOCK":IDX2BLOCK, "BLOCK2IDX":BLOCK2IDX, "candidate_matrix":candidate_matrix}
-    torch.save(save_data, 'preprocessed_data/dev_candidates.pth')
+    # block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
+    #                              args.orig_dim, args.proj_dim, for_block=True)
+    # block_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
+    # block_model.load_state_dict(torch.load(block_model_path))
+    # if args.n_gpu > 1:
+    #     block_model = nn.DataParallel(block_model)
+    # block_model.to(args.device)
+    # candidate_matrix = None
+    #
+    # with open(args.candidates_file, 'r') as f:
+    #     candidates = json.load(f)
+    #
+    # IDX2BLOCK = list(candidates.keys())
+    # BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
+    #
+    # for candidate_name in IDX2BLOCK:
+    #     tokens, token_type, token_mask = candidates[candidate_name]
+    #
+    #     # add [CLS] token to front of the fused block
+    #     tokens = ["[CLS]"] + tokens
+    #     tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
+    #     type = torch.LongTensor([[0] + token_type]).to(args.device)
+    #     mask = torch.LongTensor([[1] + token_mask]).to(args.device)
+    #
+    #     # torch.Size([1, 128])
+    #     candidate_vec = block_model(tokens, type, mask)
+    #
+    #     if candidate_matrix == None:
+    #         candidate_matrix = candidate_vec
+    #     else:
+    #         candidate_matrix = torch.cat(candidate_matrix, candidate_vec)
+    #
+    # assert candidate_matrix.size()[0] == len(IDX2BLOCK)
+    #
+    # save_data = {"IDX2BLOCK":IDX2BLOCK, "BLOCK2IDX":BLOCK2IDX, "candidate_matrix":candidate_matrix}
+    # torch.save(save_data, 'preprocessed_data/dev_candidates.pth')
