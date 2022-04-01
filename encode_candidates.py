@@ -53,7 +53,7 @@ args = parser.parse_args()
 device = torch.device("cuda:0")
 args.device = device
 
-class candidatesDataset(Dataset):
+class candidateDataset(Dataset):
     def __init__(self, data, block_tokenizer):
         super(retrieverDataset, self).__init__()
         self.data = data
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     data = list(candidates.values())
     BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
 
-    dataset = retrieverDataset(data, block_tokenizer)
+    dataset = candidateDataset(data, block_tokenizer)
     loader = DataLoader(dataset, batch_size=1, num_workers=8, pin_memory=True, drop_last=False)
 
     for batch in tqdm(loader, desc="Iteration"):
