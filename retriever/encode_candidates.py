@@ -44,6 +44,9 @@ parser.add_argument(
     help="Path to the file includes candidate fused blocks",
 )
 args = parser.parse_args()
+device = torch.device("cuda:0")
+args.n_gpu = torch.cuda.device_count()
+args.device = device
 
 if __name__ == '__main__':
     block_config = BertConfig.from_pretrained(
@@ -62,6 +65,9 @@ if __name__ == '__main__':
                                  args.orig_dim, args.proj_dim, for_block=True)
     block_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
     block_model.load_state_dict(torch.load(block_model_path))
+    if args.n_gpu > 1:
+        block_model = nn.DataParallel(block_model)
+    block_model.to(args.device)
     candidate_matrix = None
 
     with oepn(args.candidates_file, 'r') as f:
@@ -75,9 +81,9 @@ if __name__ == '__main__':
 
         # add [CLS] token to front of the fused block
         tokens = ["[CLS]"] + tokens
-        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)])
-        type = torch.LongTensor([[0] + token_type])
-        mask = torch.LongTensor([[1] + token_mask])
+        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)]).to(args.device)
+        type = torch.LongTensor([[0] + token_type]).to(args.device)
+        mask = torch.LongTensor([[1] + token_mask]).to(args.device)
 
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, type, mask)

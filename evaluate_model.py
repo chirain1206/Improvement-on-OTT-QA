@@ -49,6 +49,9 @@ parser.add_argument(
     help="k value for top_k retrieval",
 )
 args = parser.parse_args()
+device = torch.device("cuda:0")
+args.n_gpu = torch.cuda.device_count()
+args.device = device
 
 if __name__ == '__main__':
     with open('released_data/dev.traced.json', 'r') as f:
@@ -80,6 +83,9 @@ if __name__ == '__main__':
                                      args.orig_dim, args.proj_dim)
         query_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
         query_model.load_state_dict(torch.load(query_model_path))
+        if args.n_gpu > 1:
+            query_model = nn.DataParallel(query_model)
+        query_model.to(args.device)
 
         num_succ = 0
         num_fin_questions = 0
@@ -95,9 +101,9 @@ if __name__ == '__main__':
             query = trace_question['question']
             query_tokens = '[CLS] ' + question + ' [SEP]'
             query_tokens = query_tokenizer.tokenize(query_tokens)
-            query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)])
-            query_types = torch.LongTensor([[0] * len(query_tokens)])
-            query_masks = torch.LongTensor([[1] * len(query_tokens)])
+            query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
+            query_types = torch.LongTensor([[0] * len(query_tokens)]).to(args.device)
+            query_masks = torch.LongTensor([[1] * len(query_tokens)]).to(args.device)
             query_cls = query_model(query_input_tokens, query_input_types, query_input_masks)
             print(query_cls.size())
 
@@ -115,3 +121,7 @@ if __name__ == '__main__':
 
         print('finished {}/{}; HITS@{} = {} \r'.format(num_fin_questions, len(data), args.top_k,
                                                        num_succ / num_fin_questions))
+    elif args.eval_option == 'reader':
+        pass
+    elif args.eval_option == 'both':
+        pass
