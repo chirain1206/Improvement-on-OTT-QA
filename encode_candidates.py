@@ -53,16 +53,16 @@ args.n_gpu = torch.cuda.device_count()
 args.device = device
 
 if __name__ == '__main__':
-    # block_config = BertConfig.from_pretrained(
-    #     args.model_name_or_path,
-    #     cache_dir=args.cache_dir
-    # )
-    # block_tokenizer = BertTokenizer.from_pretrained(
-    #     args.model_name_or_path,
-    #     do_lower_case=args.do_lower_case,
-    #     cache_dir=args.cache_dir
-    # )
-    # block_tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
+    block_config = BertConfig.from_pretrained(
+        args.model_name_or_path,
+        cache_dir=args.cache_dir
+    )
+    block_tokenizer = BertTokenizer.from_pretrained(
+        args.model_name_or_path,
+        do_lower_case=args.do_lower_case,
+        cache_dir=args.cache_dir
+    )
+    block_tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
     args.orig_dim = block_config.hidden_size
     args.proj_dim = 128
     block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
