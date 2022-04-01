@@ -28,13 +28,13 @@ import math
 
 logger = logging.getLogger(__name__)
 
-ALL_MODELS = sum(
-    (
-        tuple(conf.pretrained_config_archive_map.keys())
-        for conf in (BertConfig, )
-    ),
-    (),
-)
+# ALL_MODELS = sum(
+#     (
+#         tuple(conf.pretrained_config_archive_map.keys())
+#         for conf in (BertConfig, )
+#     ),
+#     (),
+# )
 
 MODEL_CLASSES = {"bert": (BertConfig, BertModel, BertTokenizer)}
 
@@ -389,7 +389,7 @@ def main():
         "--model_name_or_path",
         default="bert-base-uncased",
         type=str,
-        help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(ALL_MODELS),
+        help="Path to pre-trained model or shortcut name selected in the list: ",
     )
     parser.add_argument(
         "--max_seq_length",
