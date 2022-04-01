@@ -3,7 +3,7 @@ import logging
 import json
 import os
 import sys
-# from train_retriever import VectorizeModel
+from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel)
 import torch
 from torch import nn
