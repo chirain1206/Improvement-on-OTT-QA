@@ -109,12 +109,12 @@ if __name__ == '__main__':
         tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
 
         # torch.Size([1, 128])
-        candidate_vec = block_model(tokens, token_type, token_mask)
+        candidate_vec = block_model(tokens, token_type, token_mask).cpu()
 
-        # if candidate_matrix == None:
-        #     candidate_matrix = candidate_vec
-        # else:
-        #     candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
+        if candidate_matrix == None:
+            candidate_matrix = candidate_vec
+        else:
+            candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
 
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
 
