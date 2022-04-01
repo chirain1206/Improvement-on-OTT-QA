@@ -53,10 +53,10 @@ args.n_gpu = torch.cuda.device_count()
 args.device = device
 
 if __name__ == '__main__':
-    block_config = BertConfig.from_pretrained(
-        args.model_name_or_path,
-        cache_dir=args.cache_dir
-    )
+    # block_config = BertConfig.from_pretrained(
+    #     args.model_name_or_path,
+    #     cache_dir=args.cache_dir
+    # )
     block_tokenizer = BertTokenizer.from_pretrained(
         args.model_name_or_path,
         do_lower_case=args.do_lower_case,
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     #     if candidate_matrix == None:
     #         candidate_matrix = candidate_vec
     #     else:
-    #         candidate_matrix = torch.cat(candidate_matrix, candidate_vec)
+    #         candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
     #
     # assert candidate_matrix.size()[0] == len(IDX2BLOCK)
     #
