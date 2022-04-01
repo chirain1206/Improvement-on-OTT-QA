@@ -180,6 +180,9 @@ if __name__ == '__main__':
         type=str,
         help="Path to the model that have been trained"
     )
+    parser.add_argument(
+        "--load_optimizer_and_scheduler", action="store_true", help="Whether or not to load optimizer and scheduler."
+    )
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     args = parser.parse_args()
     args.output_dir = os.path.join('retriever', args.option)
@@ -255,6 +258,7 @@ if __name__ == '__main__':
     print("Dataset Size = {}. Loader Size = {}".format(len(dataset), len(loader)))
 
     tb_writer = SummaryWriter(log_dir=args.output_dir)
+
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
     query_optimizer_grouped_parameters = [
@@ -283,6 +287,13 @@ if __name__ == '__main__':
     block_scheduler = get_linear_schedule_with_warmup(
         block_optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
     )
+
+    # Load in optimizer and scheduler states if needed
+    if args.load_optimizer_and_scheduler:
+        query_optimizer.load_state_dict(torch.load(os.path.join(args.load_model_path, 'query_model', 'checkpoint-epoch0', 'optimizer.pt')))
+        query_scheduler.load_state_dict(torch.load(os.path.join(args.load_model_path, 'query_model', 'checkpoint-epoch0', 'scheduler.pt')))
+        block_optimizer.load_state_dict(torch.load(os.path.join(args.load_model_path, 'block_model', 'checkpoint-epoch0', 'optimizer.pt')))
+        block_scheduler.load_state_dict(torch.load(os.path.join(args.load_model_path, 'block_model', 'checkpoint-epoch0', 'scheduler.pt')))
 
     global_step = 0
     tr_loss, logging_loss = 0.0, 0.0
@@ -345,6 +356,8 @@ if __name__ == '__main__':
         query_model_to_save.save_pretrained(output_dir_query)
         query_tokenizer.save_pretrained(output_dir_query)
         torch.save(args, os.path.join(output_dir_query, "training_args.bin"))
+        torch.save(query_optimizer.state_dict(), os.path.join(output_dir_query, "optimizer.pt"))
+        torch.save(query_scheduler.state_dict(), os.path.join(output_dir_query, "scheduler.pt"))
 
         output_dir_block = os.path.join(args.output_dir_block, "checkpoint-epoch{}".format(epoch))
         if not os.path.exists(output_dir_block):
@@ -353,5 +366,7 @@ if __name__ == '__main__':
         block_model_to_save.save_pretrained(output_dir_block)
         block_tokenizer.save_pretrained(output_dir_block)
         torch.save(args, os.path.join(output_dir_block, "training_args.bin"))
+        torch.save(block_optimizer.state_dict(), os.path.join(output_dir_block, "optimizer.pt"))
+        torch.save(block_scheduler.state_dict(), os.path.join(output_dir_block, "scheduler.pt"))
 
     tb_writer.close()

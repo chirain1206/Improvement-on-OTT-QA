@@ -102,6 +102,9 @@ if __name__ == '__main__':
         type=str,
         help="Where do you want to store the pre-trained models downloaded from s3",
     )
+    parser.add_argument(
+        "--load_optimizer_and_scheduler", action="store_true", help="Whether or not to load optimizer and scheduler."
+    )
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--logging_steps", type=int, default=30, help="Log every X updates steps.")
     parser.add_argument("--train_steps", default=10000, type=int, help="Total training steps.")
@@ -185,31 +188,29 @@ if __name__ == '__main__':
 
     tb_writer = SummaryWriter(log_dir=args.output_dir)
 
-    # Prepare optimizer and schedule (linear warmup and decay)
     args.num_train_epoches = 2
-    # Check if saved optimizer or scheduler states exist
-    if os.path.isfile(os.path.join(args.load_model_path, "optimizer.pt")) and os.path.isfile(
-        os.path.join(args.load_model_path, "scheduler.pt")
-    ):
-        # Load in optimizer and scheduler states
+
+    # Prepare optimizer and schedule (linear warmup and decay)
+    no_decay = ["bias", "LayerNorm.weight"]
+    optimizer_grouped_parameters = [
+        {
+            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+            "weight_decay": args.weight_decay,
+        },
+        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
+    ]
+    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
+
+    t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
+
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
+    )
+
+    # Load in optimizer and scheduler states if needed
+    if args.load_optimizer_and_scheduler:
         optimizer.load_state_dict(torch.load(os.path.join(args.load_model_path, "optimizer.pt")))
         scheduler.load_state_dict(torch.load(os.path.join(args.load_model_path, "scheduler.pt")))
-    else:
-        no_decay = ["bias", "LayerNorm.weight"]
-        optimizer_grouped_parameters = [
-            {
-                "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": args.weight_decay,
-            },
-            {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
-        ]
-        optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
-
-        t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
-
-        scheduler = get_linear_schedule_with_warmup(
-            optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
-        )
 
     global_step = 0
     tr_loss, logging_loss = 0.0, 0.0
