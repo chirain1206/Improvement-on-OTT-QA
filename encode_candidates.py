@@ -72,8 +72,6 @@ class candidateDataset(Dataset):
         type = torch.LongTensor([[0] + token_type])
         mask = torch.LongTensor([[1] + token_mask])
 
-        print(tokens.size())
-
         return tokens, type, mask
 
 if __name__ == '__main__':
@@ -104,10 +102,13 @@ if __name__ == '__main__':
     BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
 
     dataset = candidateDataset(data, block_tokenizer)
-    loader = DataLoader(dataset, batch_size=1, num_workers=8, pin_memory=True, drop_last=False)
+    loader = DataLoader(dataset, batch_size=1, num_workers=1, pin_memory=True, drop_last=False)
 
     for batch in tqdm(loader, desc="Iteration"):
         tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
+        print(tokens.size())
+        print(token_type.size())
+        print(token_mask.size())
 
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, token_type, token_mask)
