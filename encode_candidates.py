@@ -68,9 +68,9 @@ class candidateDataset(Dataset):
 
         # add [CLS] token to front of the fused block
         tokens = ["[CLS]"] + tokens
-        tokens = torch.LongTensor([block_tokenizer.convert_tokens_to_ids(tokens)])
-        type = torch.LongTensor([[0] + token_type])
-        mask = torch.LongTensor([[1] + token_mask])
+        tokens = torch.LongTensor(block_tokenizer.convert_tokens_to_ids(tokens))
+        type = torch.LongTensor([0] + token_type)
+        mask = torch.LongTensor([1] + token_mask)
 
         return tokens, type, mask
 
@@ -106,9 +106,6 @@ if __name__ == '__main__':
 
     for batch in tqdm(loader, desc="Iteration"):
         tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
-        print(tokens.size())
-        print(token_type.size())
-        print(token_mask.size())
 
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, token_type, token_mask)
