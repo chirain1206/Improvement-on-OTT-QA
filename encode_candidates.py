@@ -111,9 +111,9 @@ if __name__ == '__main__':
 
         # torch.Size([1, 128])
         candidate_vec = block_model(tokens, token_type, token_mask)
-        candidate_vec = candidate_vec.cpu()
+        candidate_vec = candidate_vec.cpu().data.numpy()
 
-        print(candidate_vec.size())
+        tmp.append(candidate_vec)
 
         # if candidate_matrix == None:
         #     candidate_matrix = candidate_vec
