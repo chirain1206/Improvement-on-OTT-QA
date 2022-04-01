@@ -57,7 +57,7 @@ args.device = device
 if __name__ == '__main__':
     with open('released_data/dev.traced.json', 'r') as f:
         data = json.load(f)
-    data = random.shuffle(data)
+    random.shuffle(data)
     data = data[:args.eval_size]
 
     if args.eval_option == 'retriever':
