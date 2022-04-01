@@ -152,6 +152,8 @@ if __name__ == '__main__':
     parser.add_argument("--train_steps", default=10000, type=int, help="Total training steps.")
     parser.add_argument("--batch_size", default=2048, type=int, help="Batch sizes for each iteration.")
     parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
+    parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
+    parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
     parser.add_argument(
         "--train_file",
         default=None,

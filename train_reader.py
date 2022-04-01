@@ -136,6 +136,8 @@ if __name__ == '__main__':
     )
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     parser.add_argument("--num_train_epoches", default=4, type=int, help="Number of epoches for training.")
+    parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
+    parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
     args = parser.parse_args()
     args.output_dir = os.path.join(args.output_dir, datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
     if not os.path.exists(args.output_dir):

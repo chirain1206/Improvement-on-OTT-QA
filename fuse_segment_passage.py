@@ -73,10 +73,10 @@ if __name__ == '__main__':
     args.max_block_len = args.max_block_len - 1
 
     n_threads = 64
-    if args.split == 'train':
-        with open('preprocessed_data/train_table_segments.json', 'r') as f:
+    if args.split == 'train' or args.split == 'dev':
+        with open(f'preprocessed_data/{args.split}_table_segments.json', 'r') as f:
             data = json.load(f)
-        with open('link_generator/train_url.json', 'r') as f:
+        with open(f'link_generator/{args.split}_url.json', 'r') as f:
             train_urls = json.load(f)
 
         with Pool(n_threads) as p:

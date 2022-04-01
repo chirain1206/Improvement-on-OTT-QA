@@ -15,7 +15,7 @@ if __name__ == '__main__':
         plain_tables = json.load(f)
 
     n_threads = 64
-    if args.split == 'train':
+    if args.split == 'train' or args.split == 'dev':
         dict_results = {}
         print("using {}".format(args.split))
         if not os.path.exists(f'preprocessed_data/{args.split}_table_segments.json'):
@@ -39,7 +39,6 @@ if __name__ == '__main__':
 
             with open(f'preprocessed_data/{args.split}_table_segments.json', 'w') as f:
                 json.dump(dict_results, f, indent=2)
-            
     elif args.split == 'all':
         dict_results = {}
         print("using {}".format(args.split))

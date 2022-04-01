@@ -54,9 +54,9 @@ if __name__ == '__main__':
 
         with open(f'link_generator/{args.split}_url.json', 'w') as f:
             json.dump(all_query_url, f, indent=2)
-    elif args.split == 'train':
+    elif args.split == 'train' or args.split == 'dev':
         train_names = []
-        with open('preprocessed_data/train_table_segments.json', 'r') as f:
+        with open(f'preprocessed_data/{args.split}_table_segments.json', 'r') as f:
             train_segments = json.load(f)
 
         # extract names of table segments to be trained
