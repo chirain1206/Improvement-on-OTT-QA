@@ -113,7 +113,7 @@ if __name__ == '__main__':
         candidate_vec = block_model(tokens, token_type, token_mask)
         candidate_vec = candidate_vec.cpu()
 
-        tmp.append(candidate_vec)
+        print(candidate_vec.size())
 
         # if candidate_matrix == None:
         #     candidate_matrix = candidate_vec
