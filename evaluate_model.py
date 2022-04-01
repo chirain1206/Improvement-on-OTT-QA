@@ -107,7 +107,6 @@ if __name__ == '__main__':
             query_input_types = torch.LongTensor([[0] * len(query_tokens)]).to(args.device)
             query_input_masks = torch.LongTensor([[1] * len(query_tokens)]).to(args.device)
             query_cls = query_model(query_input_tokens, query_input_types, query_input_masks).cpu()
-            print(query_cls.size())
 
             # compute similarity score
             retrieval_score = nn.functional.cosine_similarity(query_cls, candidate_matrix, dim=1)
