@@ -102,7 +102,7 @@ First command uses ICT to pretrain the retriever model, then the second command 
 
 ### Step3-2: Train the single-block reader
 ```
-python train_retriever.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 24
+python train_reader.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 24
 ```
 This command fine-tunes the single-block reader model.
 
