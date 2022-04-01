@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     dataset = candidateDataset(data, block_tokenizer)
     loader = DataLoader(dataset, batch_size=1, num_workers=8, pin_memory=True, drop_last=False)
-    tmp = []
+    candidate_matrix = []
 
     for batch in tqdm(loader, desc="Iteration"):
         tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
@@ -113,14 +113,12 @@ if __name__ == '__main__':
         candidate_vec = block_model(tokens, token_type, token_mask)
         candidate_vec = candidate_vec.cpu().data.numpy()
 
-        tmp.append(candidate_vec)
+        candidate_matrix.append(candidate_vec)
 
-        # if candidate_matrix == None:
-        #     candidate_matrix = candidate_vec
-        # else:
-        #     candidate_matrix = torch.cat((candidate_matrix, candidate_vec), 0)
-
+    candidate_matrix = [torch.from_numpy(t) for t in candidate_matrix]
+    candidate_matrix = torch.cat(candidate_matrix, 0)
     assert candidate_matrix.size()[0] == len(IDX2BLOCK)
+    assert candidate_matrix.size()[1] == 128
 
     save_data = {"IDX2BLOCK":IDX2BLOCK, "BLOCK2IDX":BLOCK2IDX, "candidate_matrix":candidate_matrix}
     torch.save(save_data, 'preprocessed_data/dev_candidates.pth')
