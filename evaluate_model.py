@@ -93,7 +93,7 @@ if __name__ == '__main__':
         num_fin_questions = 0
         for trace_question in data:
             answer_row = set()
-            for node in trace_question['answer_node']:
+            for node in trace_question['answer-node']:
                 answer_row.add(node[1][0])
             answer_segment = set()
             for row in answer_row:
