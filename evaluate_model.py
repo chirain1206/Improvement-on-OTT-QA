@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
             # compute vector for the question
             query = trace_question['question']
-            query_tokens = '[CLS] ' + question + ' [SEP]'
+            query_tokens = '[CLS] ' + query + ' [SEP]'
             query_tokens = query_tokenizer.tokenize(query_tokens)
             query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
             query_types = torch.LongTensor([[0] * len(query_tokens)]).to(args.device)
