@@ -107,7 +107,6 @@ if __name__ == '__main__':
     )
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--logging_steps", type=int, default=30, help="Log every X updates steps.")
-    parser.add_argument("--train_steps", default=10000, type=int, help="Total training steps.")
     parser.add_argument("--batch_size", default=24, type=int, help="Batch sizes for each iteration.")
     parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
     parser.add_argument(
@@ -136,6 +135,7 @@ if __name__ == '__main__':
         help="Path to the model that have been trained"
     )
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
+    parser.add_argument("--num_train_epoches", default=4, type=int, help="Number of epoches for training.")
     args = parser.parse_args()
     args.output_dir = os.path.join(args.output_dir, datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
     if not os.path.exists(args.output_dir):
@@ -188,8 +188,6 @@ if __name__ == '__main__':
 
     tb_writer = SummaryWriter(log_dir=args.output_dir)
 
-    args.num_train_epoches = 2
-
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
@@ -201,7 +199,7 @@ if __name__ == '__main__':
     ]
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
 
-    t_total = args.num_train_epoches * (len(dataset) // args.batch_size) * args.batch_size
+    t_total = args.num_train_epoches * len(loader)
 
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
