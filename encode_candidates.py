@@ -102,7 +102,7 @@ if __name__ == '__main__':
     BLOCK2IDX = {block_name: i for i, block_name in enumerate(IDX2BLOCK)}
 
     dataset = candidateDataset(data, block_tokenizer)
-    loader = DataLoader(dataset, batch_size=1, num_workers=1, pin_memory=True, drop_last=False)
+    loader = DataLoader(dataset, batch_size=1, num_workers=1, drop_last=False)
 
     for batch in tqdm(loader, desc="Iteration"):
         tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
