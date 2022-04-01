@@ -7,7 +7,6 @@ import random
 from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel)
 from torch import nn
-from train_retriever import VectorizeModel
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -87,6 +86,7 @@ if __name__ == '__main__':
         if args.n_gpu > 1:
             query_model = nn.DataParallel(query_model)
         query_model.to(args.device)
+        query_model.eval()
 
         num_succ = 0
         num_fin_questions = 0
@@ -105,7 +105,7 @@ if __name__ == '__main__':
             query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
             query_types = torch.LongTensor([[0] * len(query_tokens)]).to(args.device)
             query_masks = torch.LongTensor([[1] * len(query_tokens)]).to(args.device)
-            query_cls = query_model(query_input_tokens, query_input_types, query_input_masks)
+            query_cls = query_model(query_input_tokens, query_input_types, query_input_masks).cpu()
             print(query_cls.size())
 
             # compute similarity score

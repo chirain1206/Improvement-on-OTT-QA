@@ -109,7 +109,8 @@ if __name__ == '__main__':
         tokens, token_type, token_mask = tuple(t.to(args.device) for t in batch)
 
         # torch.Size([1, 128])
-        candidate_vec = block_model(tokens, token_type, token_mask).cpu()
+        candidate_vec = block_model(tokens, token_type, token_mask)
+        candidate_vec = candidate_vec.cpu()
 
         if candidate_matrix == None:
             candidate_matrix = candidate_vec
