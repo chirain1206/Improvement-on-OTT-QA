@@ -6,6 +6,7 @@ import sys
 from transformers import (BertConfig, BertTokenizer, BertModel)
 import torch
 from torch import nn
+from train_stage12 import PretrainedModel
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
