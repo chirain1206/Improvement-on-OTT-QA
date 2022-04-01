@@ -60,35 +60,35 @@ if __name__ == '__main__':
     random.shuffle(data)
     data = data[:args.eval_size]
 
+    # load the matrix of candidates
+    candidate_info = torch.load('./preprocessed_data/dev_candidates.pth')
+    IDX2BLOCK = candidate_info['IDX2BLOCK']
+    BLOCK2IDX = candidate_info['BLOCK2IDX']
+    candidate_matrix = candidate_info['candidate_matrix']
+
+    query_config = BertConfig.from_pretrained(
+        args.model_name_or_path,
+        cache_dir=args.cache_dir
+    )
+    query_tokenizer = BertTokenizer.from_pretrained(
+        args.model_name_or_path,
+        do_lower_case=True,
+        cache_dir=args.cache_dir
+    )
+    args.orig_dim = query_config.hidden_size
+    args.proj_dim = 128
+
+    query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer),
+                                 args.cache_dir,
+                                 args.orig_dim, args.proj_dim)
+    query_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
+    query_model.load_state_dict(torch.load(query_model_path))
+    if args.n_gpu > 1:
+        query_model = nn.DataParallel(query_model)
+    query_model.to(args.device)
+    query_model.eval()
+
     if args.eval_option == 'retriever':
-        # load the matrix of candidates
-        candidate_info = torch.load('./preprocessed_data/dev_candidates.pth')
-        IDX2BLOCK = candidate_info['IDX2BLOCK']
-        BLOCK2IDX = candidate_info['BLOCK2IDX']
-        candidate_matrix = candidate_info['candidate_matrix']
-
-        query_config = BertConfig.from_pretrained(
-            args.model_name_or_path,
-            cache_dir=args.cache_dir
-        )
-        query_tokenizer = BertTokenizer.from_pretrained(
-            args.model_name_or_path,
-            do_lower_case=True,
-            cache_dir=args.cache_dir
-        )
-        args.orig_dim = query_config.hidden_size
-        args.proj_dim = 128
-
-        query_model = VectorizeModel(BertModel, args.model_name_or_path, query_config, len(query_tokenizer),
-                                     args.cache_dir,
-                                     args.orig_dim, args.proj_dim)
-        query_model_path = os.path.join(args.load_model_path, 'pytorch_model.bin')
-        query_model.load_state_dict(torch.load(query_model_path))
-        if args.n_gpu > 1:
-            query_model = nn.DataParallel(query_model)
-        query_model.to(args.device)
-        query_model.eval()
-
         num_succ = 0
         num_fin_questions = 0
         for trace_question in data:
@@ -122,7 +122,17 @@ if __name__ == '__main__':
 
         print('finished {}/{}; HITS@{} = {} \r'.format(num_fin_questions, len(data), args.top_k,
                                                        num_succ / num_fin_questions))
-    elif args.eval_option == 'reader':
-        pass
     elif args.eval_option == 'both':
-        pass
+        for trace_question in data:
+            # compute vector for the question
+            query = trace_question['question']
+            query_tokens = '[CLS] ' + query + ' [SEP]'
+            query_tokens = query_tokenizer.tokenize(query_tokens)
+            query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
+            query_input_types = torch.LongTensor([[0] * len(query_tokens)]).to(args.device)
+            query_input_masks = torch.LongTensor([[1] * len(query_tokens)]).to(args.device)
+            query_cls = query_model(query_input_tokens, query_input_types, query_input_masks).cpu()
+
+            # compute similarity score
+            retrieval_score = nn.functional.cosine_similarity(query_cls, candidate_matrix, dim=1)
+            scores, indices = torch.topk(retrieval_score, args.top_k)

@@ -14,13 +14,14 @@ logger.addHandler(console)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--evaluation_size', type=int, default=1000)
+parser.add_argument('--eval_file', type=str, default='link_generator/train_url.json')
 args = parser.parse_args()
 
 
 if __name__ == '__main__':
     n_threads = os.cpu_count()
 
-    with open('link_generator/train_url.json', 'r') as f:
+    with open(args.eval_file, 'r') as f:
         data = json.load(f)
 
     block_names = list(data.keys())

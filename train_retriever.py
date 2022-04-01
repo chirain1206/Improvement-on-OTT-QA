@@ -241,8 +241,8 @@ def main():
     block_model = VectorizeModel(BertModel, args.model_name_or_path, block_config, len(block_tokenizer), args.cache_dir,
                                  args.orig_dim, args.proj_dim, for_block=True)
     if len(args.load_model_path) > 0:
-        query_model_path = os.path.join(args.load_model_path, 'query_model', 'checkpoint-epoch0', 'pytorch_model.bin')
-        block_model_path = os.path.join(args.load_model_path, 'block_model', 'checkpoint-epoch0', 'pytorch_model.bin')
+        query_model_path = os.path.join(args.load_model_path, 'query_model', 'checkpoint-epoch4', 'pytorch_model.bin')
+        block_model_path = os.path.join(args.load_model_path, 'block_model', 'checkpoint-epoch4', 'pytorch_model.bin')
         query_model.load_state_dict(torch.load(query_model_path))
         block_model.load_state_dict(torch.load(block_model_path))
     if args.n_gpu > 1:
