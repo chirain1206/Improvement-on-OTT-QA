@@ -107,7 +107,13 @@ python train_reader.py --do_lower_case --train_file reader/fine_tune_data.json -
 This command fine-tunes the single-block reader model.
 
 ## Step4: Evaluation
-Working on
+### Step4-1: Data preprocess
+```
+python split_tables.py --split dev
+python convert_query_to_url.py --split dev --model retriever/text_title_bm25/index-bm25-ngram\=2-hash\=16777216-tokenizer\=simple.npz
+python fuse_segment_passage.py --split dev
+```
+Above commands create fused blocks for dev set.
 
 ## GPT-2 Link Prediction in Table
 We also provide the script to predict the links from the given table based on the context using GPT-2 model. To train the model, please use the following command.
