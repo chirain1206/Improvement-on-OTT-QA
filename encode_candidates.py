@@ -40,6 +40,12 @@ parser.add_argument(
     type=str,
     help="Path to the file includes candidate fused blocks",
 )
+parser.add_argument(
+    "--do_lower_case",
+    default=True,
+    action=store_true,
+    help="Path to the file includes candidate fused blocks",
+)
 args = parser.parse_args()
 device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
