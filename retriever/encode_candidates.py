@@ -7,7 +7,7 @@ from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel)
 import torch
 
-sys.path.append(os.path.dirname(".."))
+sys.path.append("..")
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
