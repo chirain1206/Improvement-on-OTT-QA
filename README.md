@@ -15,9 +15,9 @@ This respository contains the OTT-QA dataset used in [Open Question Answering ov
 - retriever/: the folder contains the script to build sparse retriever index.
 
 ## Requirements
-- [Transformers 2.2.1](https://github.com/huggingface/transformers)
-- [Pytorch 1.4](https://pytorch.org/)
-- [scipy](https://www.scipy.org/)
+- Transformers 2.4.0 (>=4.2.0 for GENRE improvement strategy)
+- Pytorch 1.4
+- scipy
 
 We suggest using virtual environment to install these dependencies.
 ```
@@ -138,7 +138,8 @@ python encode_candidates.py --load_model_path retriever/fine_tune/2022_03_30_04_
 To evaluate its effectiveness, add option ```--retain_passage``` in evaluation process.
 
 ### Improvement Strategy 2: Use GPT-2 model to augment the query
-Use GPT-2 model to pre-augment the query in order to relieve the low lexical overlap issue in retriever. Add option ```--load_gpt_model_path link_generator/model-ep9.pt --predict_title``` in the evaluation process to enable it.
+Use GPT-2 model to pre-augment the query in order to relieve the low lexical overlap issue in retriever.
+To enable it, add option ```--load_gpt_model_path link_generator/model-ep9.pt --predict_title``` in the evaluation process.
 
 ### Improvement Strategy 3: Use GENRE model to replace GPT-2 model in fusion procedure
 Working on
