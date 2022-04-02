@@ -185,7 +185,7 @@ if __name__ == '__main__':
                 }
 
                 reader_outputs = reader_model(**reader_inputs)
-                print(reader_outputs)
+                print(reader_outputs[0].size())
 
                 break
             break
