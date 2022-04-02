@@ -193,6 +193,7 @@ if __name__ == '__main__':
                 end_score = end_probs[0][end_index]
                 end_index = end_index + start_index
 
+                print(trace_question['question'])
                 print(start_index, start_score)
                 print(end_index, end_score)
                 print(reader_input_tokens[start_index:end_index+1])
