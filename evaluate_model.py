@@ -6,6 +6,8 @@ import sys
 import random
 from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel, BertForQuestionAnswering)
+from transformers import GPT2Config
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from torch import nn
 import torch
 from fuzzywuzzy import fuzz
@@ -33,6 +35,12 @@ parser.add_argument(
     help="Path to the reader model that have been trained"
 )
 parser.add_argument(
+    "--load_gpt_model_path",
+    default="",
+    type=str,
+    help="Path to the GPT-2 model that have been trained"
+)
+parser.add_argument(
     "--model_name_or_path",
     default="bert-base-uncased",
     type=str,
@@ -57,11 +65,46 @@ parser.add_argument(
     help="k value for top_k retrieval",
 )
 parser.add_argument('--retain_passage', action="store_true", default=False, help="Whether or not to retain passages following the improvement strategy")
+parser.add_argument('--predict_title', action="store_true", default=False, help="Whether or not to predict title following the improvement strategy")
 parser.add_argument('--max_block_len', type=int, default=512)
 args = parser.parse_args()
 device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
 args.device = device
+
+def sample_sequence(model, tokenizer, length, context, args, temperature=1):
+    generated = torch.LongTensor([tokenizer.encode(context + '[START]', add_special_tokens=False)])
+    predict_index = generated.size()[1]
+    batch_size = generated.shape[0]
+
+    finished_sentence = [False for _ in range(batch_size)]
+    with torch.no_grad():
+        for _ in range(length):
+            outputs = model(generated, *args)
+            if isinstance(outputs, list) or isinstance(outputs, tuple):
+                next_token_logits = outputs[0][:, -1, :] / (temperature if temperature > 0 else 1.)
+            else:
+                next_token_logits = outputs[:, -1, :] / (temperature if temperature > 0 else 1.)
+
+            if temperature == 0:  # greedy sampling:
+                next_token = torch.argmax(next_token_logits, dim=-1).unsqueeze(-1)
+            else:
+                next_token = torch.multinomial(torch.softmax(next_token_logits, dim=-1), num_samples=1)
+
+            generated = torch.cat((generated, next_token), dim=1)
+
+            if all(finished_sentence):
+                break
+
+    prediction = finished_sentence[:, prefix.shape[1]:].cpu().data.numpy()
+    text = tokenizer.decode(prediction[0], clean_up_tokenization_spaces=True)
+    decoded = []
+    for _ in text[:text.find('[EOS]')].split(' # '):
+        name = _.replace('#', '').strip()
+        if len(name) > 1 and name not in decoded:
+            decoded.append(name)
+
+    return '(' + ','.join(decoded) + ')'
 
 if __name__ == '__main__':
     with open('released_data/dev.traced.json', 'r') as f:
@@ -103,10 +146,29 @@ if __name__ == '__main__':
     query_model.to(args.device)
     query_model.eval()
 
+    if args.predict_title:
+        gpt_tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        gpt_tokenizer.add_tokens(['[SEP]', '[EOS]', '[START]', '[ENT]'])
+        gpt_model = GPT2LMHeadModel.from_pretrained('gpt2')
+        gpt_model.resize_token_embeddings(len(gpt_tokenizer))
+        gpt_model.load_state_dict(torch.load(args.load_gpt_model_path))
+        if args.n_gpu > 1:
+            gpt_model = nn.DataParallel(gpt_model)
+        gpt_model.to(args.device)
+        gpt_model.eval()
+
     if args.eval_option == 'retriever':
         num_succ = 0
         num_fin_questions = 0
         for trace_question in data:
+            if args.predict_title:
+                input_title = 'In ' ' [SEP] ' + ' [SEP] ' + ' [ENT] ' + trace_question['question'] + ' [ENT] '
+                prediction = sample_sequence(gpt_model, gpt_tokenizer, 16, input_title, [], temperature=0)
+                query = trace_question['question'] + prediction
+                print(trace_question['question'])
+                print(prediction)
+            else:
+                query = trace_question['question']
             answer_row = set()
             for node in trace_question['answer-node']:
                 answer_row.add(node[1][0])
@@ -116,7 +178,6 @@ if __name__ == '__main__':
                 answer_segment.add(trace_question['table_id'])
 
             # compute vector for the question
-            query = trace_question['question']
             query_tokens = '[CLS] ' + query + ' [SEP]'
             query_tokens = query_tokenizer.tokenize(query_tokens)
             query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
@@ -127,6 +188,8 @@ if __name__ == '__main__':
             # compute similarity score
             retrieval_score = nn.functional.cosine_similarity(query_cls, candidate_matrix, dim=1)
             _, indices = torch.topk(retrieval_score, args.top_k)
+
+            break
 
             for i in range(args.top_k):
                 # if IDX2BLOCK[indices[i].item()] in answer_segment:
@@ -169,6 +232,13 @@ if __name__ == '__main__':
         num_succ = 0
         num_fin_questions = 0
         for trace_question in data:
+            if args.predict_title:
+                input_title = 'In ' ' [SEP] ' + ' [SEP] ' + ' [ENT] ' + trace_question['question'] + ' [ENT] '
+                prediction = sample_sequence(gpt_model, gpt_tokenizer, 16, input_title, [], temperature=0)
+                query = trace_question['question'] + prediction
+            else:
+                query = trace_question['question']
+
             # compute vector for the question
             query = trace_question['question']
             query_tokens = '[CLS] ' + query + ' [SEP]'
