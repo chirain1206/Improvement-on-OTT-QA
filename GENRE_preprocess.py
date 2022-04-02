@@ -14,7 +14,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.device = torch.device("cuda:0")
 
-    model = GENRE.from_pretrained("models/hf_e2e_entity_linking_wiki_abs")\
+    model = GENRE.from_pretrained("models/hf_e2e_entity_linking_wiki_abs")
     model.to(args.device)
     model.eval()
 
