@@ -127,11 +127,11 @@ if __name__ == '__main__':
                     num_succ += 1
                     break
             num_fin_questions += 1
-            sys.stdout.write('finished {}/{}; HITS@{} = {} \r'.format(num_fin_questions, len(data), args.top_k,
-                                                                      num_succ / num_fin_questions))
+            sys.stdout.write('finished {}/{}; HITS@{} = {:.2f}% \r'.format(num_fin_questions, len(data), args.top_k,
+                                                                      100 * (num_succ / num_fin_questions)))
 
-        print('finished {}/{}; HITS@{} = {} \r'.format(num_fin_questions, len(data), args.top_k,
-                                                       num_succ / num_fin_questions))
+        print('finished {}/{}; HITS@{} = {:.2f}% \r'.format(num_fin_questions, len(data), args.top_k,
+                                                       100 * (num_succ / num_fin_questions)))
     elif args.eval_option == 'both':
         with open('preprocessed_data/dev_fused_blocks.json', 'r') as f:
             fused_blocks = json.load(f)
