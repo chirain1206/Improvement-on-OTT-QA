@@ -168,9 +168,6 @@ if __name__ == '__main__':
                 input_title = 'In ' ' [SEP] ' + ' [SEP] ' + ' [ENT] ' + trace_question['question'] + ' [ENT] '
                 prediction = sample_sequence(gpt_model, gpt_tokenizer, 16, input_title, [], temperature=0)
                 query = trace_question['question'] + prediction
-                if len(prediction) != 0:
-                    print(trace_question['question'])
-                    print(prediction)
             else:
                 query = trace_question['question']
             answer_row = set()
