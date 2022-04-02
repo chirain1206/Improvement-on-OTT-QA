@@ -96,6 +96,7 @@ def sample_sequence(model, tokenizer, length, context, sub_args, temperature=1):
             if all(finished_sentence):
                 break
 
+    print(predict_index)
     prediction = finished_sentence[:, predict_index:].cpu().data.numpy()
     text = tokenizer.decode(prediction[0], clean_up_tokenization_spaces=True)
     decoded = []
