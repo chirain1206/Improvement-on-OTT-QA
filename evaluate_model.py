@@ -136,8 +136,6 @@ if __name__ == '__main__':
 
         for trace_question in data:
             # compute vector for the question
-            if trace_question['question'] != "Blue Mountain arabica coffee is named after what kind of location in the country whose capital city is Kingston ?":
-                continue
             query = trace_question['question']
             query_tokens = '[CLS] ' + query + ' [SEP]'
             query_tokens = query_tokenizer.tokenize(query_tokens)
@@ -187,7 +185,14 @@ if __name__ == '__main__':
                 }
 
                 reader_outputs = reader_model(**reader_inputs)
-                print(reader_outputs[0].size())
+                start_probs = nn.functional.softmax(reader_outputs[0], dim=1)
+                end_probs = nn.functional.softmax(reader_outputs[1], dim=1)
+                start_index = torch.argmax(start_probs, dim=1).item()
+                start_score = start_probs[0][start_index]
+                end_index = torch.argmax(end_probs, dim=1).item()
+                end_score = end_probs[0][start_index]
 
+                print(start_index, start_score)
+                print(end_index, end_score)
                 break
             break
