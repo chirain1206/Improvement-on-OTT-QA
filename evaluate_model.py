@@ -184,7 +184,7 @@ if __name__ == '__main__':
                     "token_type_ids": reader_input_masks,
                 }
 
-                reader_outputs = reader_model(**inputs)
+                reader_outputs = reader_model(**reader_inputs)
                 print(reader_outputs)
 
                 break
