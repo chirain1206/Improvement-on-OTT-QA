@@ -85,6 +85,8 @@ def fusion(cur_table_name):
         else:
             fused_block_dict[segment_name] = [tokens, token_type, token_mask]
 
+    if cur_table_name == "Orson_Scott_Card_bibliography_0":
+        print(fused_block_dict)
     return fused_block_dict
 
 if __name__ == '__main__':
