@@ -75,7 +75,7 @@ def fusion(cur_table_name):
                 if args.retain_passage:
                     token_mask = [1] * len(tokens)
                     fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
-                    if numb_processed_passage < linked_passages:
+                    if numb_processed_passage < len(linked_passages):
                         tokens = row[0].copy()
                         lst_type = row[1][-1]
                         token_type = row[1].copy()
