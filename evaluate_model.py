@@ -213,6 +213,6 @@ if __name__ == '__main__':
             if output_answer.lower() == trace_question['answer-text'].lower():
                 num_succ += 1
             num_fin_questions += 1
-            sys.stdout.write('finished {}/{}; EM score = {}% \r'.format(num_fin_questions, len(data), 100 * (num_succ / num_fin_questions)))
+            sys.stdout.write('finished {}/{}; EM score = {:.2f}% \r'.format(num_fin_questions, len(data), 100 * (num_succ / num_fin_questions)))
 
-        print('finished {}/{}; EM score = {}% \r'.format(num_fin_questions, len(data), 100 * (num_succ / num_fin_questions)))
+        print('finished {}/{}; EM score = {:.2f}% \r'.format(num_fin_questions, len(data), 100 * (num_succ / num_fin_questions)))
