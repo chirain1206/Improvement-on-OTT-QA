@@ -59,11 +59,14 @@ def fusion(cur_table_name):
             linked_passages = []
 
         # concatenate passages to end of table segment
+        numb_processed_passage = 0
+        finished = False
         for cur_passage in linked_passages:
             passage_token = tokenizer.tokenize("[SEP] " + cur_passage)
             tokens += passage_token
             token_type += [int(not lst_type)] * len(passage_token)
             lst_type = int(not lst_type)
+            numb_processed_passage += 1
             if len(tokens) >= args.max_block_len:
                 tokens = tokens[:args.max_block_len]
                 token_type = token_type[:args.max_block_len]
@@ -72,18 +75,20 @@ def fusion(cur_table_name):
                 if args.retain_passage:
                     token_mask = [1] * len(tokens)
                     fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
-                    tokens = row[0].copy()
-                    lst_type = row[1][-1]
-                    token_type = row[1].copy()
-                    extra_segment_name = str(int(extra_segment_name) + 1)
-                    if segment_name == "Kishore_Kumar_1_3":
-                        print(len(tokens))
+                    if numb_processed_passage < linked_passages:
+                        tokens = row[0].copy()
+                        lst_type = row[1][-1]
+                        token_type = row[1].copy()
+                        extra_segment_name = str(int(extra_segment_name) + 1)
+                    else:
+                        finished = True
                 else:
                     break
 
         token_mask = [1] * len(tokens)
         if args.retain_passage:
-            fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
+            if not finished:
+                fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
         else:
             fused_block_dict[segment_name] = [tokens, token_type, token_mask]
 
