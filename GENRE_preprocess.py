@@ -12,8 +12,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--option', type=str, default='title', help='title or url')
     args = parser.parse_args()
+    args.device = torch.device("cuda:0")
 
-    model = GENRE.from_pretrained("models/hf_e2e_entity_linking_wiki_abs").eval()
+    model = GENRE.from_pretrained("models/hf_e2e_entity_linking_wiki_abs")\
+    model.to(args.device)
+    model.eval()
 
     if args.option == 'title':
         with open('../Improvement-on-OTT-QA/released_data/dev.traced.json', 'r') as f:
