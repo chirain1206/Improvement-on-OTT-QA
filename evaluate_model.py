@@ -194,5 +194,6 @@ if __name__ == '__main__':
 
                 print(start_index, start_score)
                 print(end_index, end_score)
+                print(reader_tokenizer.decode(reader_input_tokens[start_index:end_index+1]))
                 break
             break
