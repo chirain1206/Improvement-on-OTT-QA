@@ -167,7 +167,7 @@ if __name__ == '__main__':
         num_fin_questions = 0
         for trace_question in data:
             if args.predict_title:
-                input_title = 'In ' ' [SEP] ' + ' [SEP] ' + ' [ENT] ' + trace_question['question'] + ' [ENT] '
+                input_title = ' [ENT] ' + trace_question['question'] + ' [ENT] '
                 prediction = sample_sequence(gpt_model, gpt_tokenizer, 16, input_title, [], temperature=0)
                 query = trace_question['question'] + prediction
             else:
