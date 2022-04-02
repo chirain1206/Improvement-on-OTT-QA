@@ -72,7 +72,7 @@ device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
 args.device = device
 
-def sample_sequence(model, tokenizer, length, context, args, temperature=1):
+def sample_sequence(model, tokenizer, length, context, sub_args, temperature=1):
     generated = torch.LongTensor([tokenizer.encode(context + '[START]', add_special_tokens=False)]).to(args.device)
     predict_index = generated.size()[1]
     batch_size = generated.shape[0]
@@ -80,7 +80,7 @@ def sample_sequence(model, tokenizer, length, context, args, temperature=1):
     finished_sentence = [False for _ in range(batch_size)]
     with torch.no_grad():
         for _ in range(length):
-            outputs = model(generated, *args)
+            outputs = model(generated, *sub_args)
             if isinstance(outputs, list) or isinstance(outputs, tuple):
                 next_token_logits = outputs[0][:, -1, :] / (temperature if temperature > 0 else 1.)
             else:
