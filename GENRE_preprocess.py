@@ -3,7 +3,7 @@ from genre.trie import Trie
 from genre.fairseq_model import GENRE
 from genre.entity_linking import get_end_to_end_prefix_allowed_tokens_fn_hf as get_prefix_allowed_tokens_fn
 from genre.utils import get_entity_spans_hf as get_entity_spans
-from tqdm import trange
+from tqdm import trange, tqdm
 
 def find_urls(search_sentence):
     pass
@@ -42,7 +42,7 @@ if __name__ == '__main__':
             dev_segments = json.load(f)
         table_names = dev_segments.keys()
 
-        for name in table_names:
+        for name in tqdm(table_names):
             with open(f'../Improvement-on-OTT-QA/data/traindev_tables_tok/{name}.json', 'r') as f:
                 cur_table = json.load(f)
             title = cur_table['title']
