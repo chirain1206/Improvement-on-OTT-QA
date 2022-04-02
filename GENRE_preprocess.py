@@ -37,10 +37,6 @@ if __name__ == '__main__':
         with open('../Improvement-on-OTT-QA/released_data/dev.traced_GENRE.json', 'w') as f:
             json.dump(process_data, f, indent=2)
     elif args.option == 'url':
-        with open('../Improvement-on-OTT-QA/data/all_passages.json', 'r') as f:
-            passages = json.load(f)
-        potential_url = list(passages.keys())
-        cand_trie = Trie([model.encode(" }} [ {} ]".format(e))[1:].tolist() for e in potential_url])
         segment_url_dict = {}
 
         with open('../Improvement-on-OTT-QA/preprocessed_data/dev_table_segments.json', 'r') as f:
@@ -59,8 +55,8 @@ if __name__ == '__main__':
                         segment_repr = segment_repr + header[0] + ' is ' + row[col_index][0] + ', '
                     else:
                         segment_repr = segment_repr + header[0] + ' is ' + row[col_index][0] + '.'
-                prefix_allowed_tokens_fn = get_prefix_allowed_tokens_fn(model, segment_repr, candidates_trie=cand_trie)
-                generated = get_entity_spans(model, segment_repr, candidates_trie=cand_trie)
+                prefix_allowed_tokens_fn = get_prefix_allowed_tokens_fn(model, [segment_repr])
+                generated = get_entity_spans(model, [segment_repr])
                 generated2 = model.sample(segment_repr, prefix_allowed_tokens_fn=prefix_allowed_tokens_fn)[0][0]['text']
                 print(generated2)
                 print(generated)
@@ -68,5 +64,5 @@ if __name__ == '__main__':
                 break
             break
 
-        # with open(f'../Improvement-on-OTT-QA/link_generator/dev_url_GENRE.json', 'w') as f:
+        # with open(f'../Improvement-on-OTT-QA/link_generator/dev_passage_query_GENRE.json', 'w') as f:
         #     json.dump(segment_url_dict, f, indent=2)
