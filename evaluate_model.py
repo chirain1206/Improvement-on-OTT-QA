@@ -134,6 +134,25 @@ if __name__ == '__main__':
         with open('preprocessed_data/dev_fused_blocks.json', 'r') as f:
             fused_blocks = json.load(f)
 
+        # load the reader model
+        reader_tokenizer = BertTokenizer.from_pretrained(
+            args.model_name_or_path,
+            do_lower_case=True,
+            cache_dir=args.cache_dir
+        )
+        reader_tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
+        reader_model = BertForQuestionAnswering.from_pretrained(
+            args.model_name_or_path,
+            config=query_config,
+            cache_dir=args.cache_dir if args.cache_dir else None,
+        )
+        reader_model.resize_token_embeddings(len(reader_tokenizer))
+        reader_model.load_state_dict(torch.load(os.path.join(args.load_reader_model_path, 'pytorch_model.bin')))
+        if args.n_gpu > 1:
+            reader_model = nn.DataParallel(reader_model)
+        reader_model.to(args.device)
+        reader_model.eval()
+
         num_succ = 0
         num_fin_questions = 0
         for trace_question in data:
@@ -152,25 +171,6 @@ if __name__ == '__main__':
             retrieval_blocks = [IDX2BLOCK[indice.item()] for indice in indices]
             candidate_answer = []
             candidate_answer_scores = []
-
-            # load the reader model
-            reader_tokenizer = BertTokenizer.from_pretrained(
-                args.model_name_or_path,
-                do_lower_case=True,
-                cache_dir=args.cache_dir
-            )
-            reader_tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
-            reader_model = BertForQuestionAnswering.from_pretrained(
-                args.model_name_or_path,
-                config=query_config,
-                cache_dir=args.cache_dir if args.cache_dir else None,
-            )
-            reader_model.resize_token_embeddings(len(reader_tokenizer))
-            reader_model.load_state_dict(torch.load(os.path.join(args.load_reader_model_path, 'pytorch_model.bin')))
-            if args.n_gpu > 1:
-                reader_model = nn.DataParallel(reader_model)
-            reader_model.to(args.device)
-            reader_model.eval()
 
             for cur_block in retrieval_blocks:
                 block_len_limit = args.max_block_len - len(query_tokens)
