@@ -24,7 +24,7 @@ if __name__ == '__main__':
         with open('../Improvement-on-OTT-QA/released_data/dev.traced.json', 'r') as f:
             data = json.load(f)
         process_data = []
-        process_size = 200
+        process_size = len(data)
         for i in trange(process_size):
             traced_question = data[i]
             question = traced_question['question']
