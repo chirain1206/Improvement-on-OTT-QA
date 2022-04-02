@@ -30,7 +30,7 @@ if __name__ == '__main__':
             question = traced_question['question']
             prefix_allowed_tokens_fn = get_prefix_allowed_tokens_fn(model, [question])
 
-            process_question = model.sample(question, prefix_allowed_tokens_fn=prefix_allowed_tokens_fn)[0][0]['text']
+            process_question = model.sample([question], prefix_allowed_tokens_fn=prefix_allowed_tokens_fn)[0][0]['text']
             traced_question['question'] = process_question
             process_data.append(traced_question)
 
