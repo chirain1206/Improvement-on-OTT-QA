@@ -134,6 +134,8 @@ if __name__ == '__main__':
         with open('preprocessed_data/dev_fused_blocks.json', 'r') as f:
             fused_blocks = json.load(f)
 
+        num_succ = 0
+        num_fin_questions = 0
         for trace_question in data:
             # compute vector for the question
             query = trace_question['question']
@@ -205,8 +207,10 @@ if __name__ == '__main__':
             candidate_answer_scores = torch.Tensor(candidate_answer_scores)
             sum_answer_scores = torch.mul(scores, candidate_answer_scores)
             output_answer = candidate_answer[torch.argmax(sum_answer_scores).item()]
-            print(trace_question['question'])
-            print(trace_question['answer-text'])
-            print(output_answer)
 
-            break
+            if output_answer.lower() == trace_question['answer-text'].lower():
+                num_succ += 1
+            num_fin_questions += 1
+            sys.stdout.write('finished {}/{}; EM score = {} \r'.format(num_fin_questions, len(data), num_succ / num_fin_questions))
+
+        print('finished {}/{}; EM score = {} \r'.format(num_fin_questions, len(data), num_succ / num_fin_questions))
