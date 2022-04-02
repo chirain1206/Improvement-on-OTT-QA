@@ -50,6 +50,7 @@ parser.add_argument(
     action="store_true",
     help="Path to the file includes candidate fused blocks",
 )
+parser.add_argument('--retain_passage', action="store_true", default=False, help="Whether or not to retain passages following the improvement strategy")
 args = parser.parse_args()
 device = torch.device("cuda:0")
 args.device = device
@@ -121,4 +122,7 @@ if __name__ == '__main__':
     assert candidate_matrix.size()[1] == 128
 
     save_data = {"IDX2BLOCK":IDX2BLOCK, "BLOCK2IDX":BLOCK2IDX, "candidate_matrix":candidate_matrix}
-    torch.save(save_data, 'preprocessed_data/dev_candidates.pth')
+    if args.retain_passage:
+        torch.save(save_data, 'preprocessed_data/dev_candidates_retained.pth')
+    else:
+        torch.save(save_data, 'preprocessed_data/dev_candidates.pth')
