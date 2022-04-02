@@ -30,7 +30,6 @@ parser.add_argument(
     "--load_reader_model_path",
     default="",
     type=str,
-    required=True,
     help="Path to the reader model that have been trained"
 )
 parser.add_argument(
