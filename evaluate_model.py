@@ -136,8 +136,9 @@ if __name__ == '__main__':
 
         for trace_question in data:
             # compute vector for the question
+            if trace_question['question'] != "Blue Mountain arabica coffee is named after what kind of location in the country whose capital city is Kingston ?":
+                continue
             query = trace_question['question']
-            print(query)
             query_tokens = '[CLS] ' + query + ' [SEP]'
             query_tokens = query_tokenizer.tokenize(query_tokens)
             query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
@@ -170,7 +171,6 @@ if __name__ == '__main__':
             reader_model.eval()
 
             for cur_block in retrieval_blocks:
-                print(cur_block)
                 block_len_limit = args.max_block_len - len(query_tokens)
                 reader_input_tokens = query_tokens + fused_blocks[cur_block][0][:block_len_limit]
                 reader_input_types = [1] * (len(query_tokens) - 1) + [0] + fused_blocks[cur_block][1][:block_len_limit]
@@ -187,7 +187,6 @@ if __name__ == '__main__':
                 }
 
                 reader_outputs = reader_model(**reader_inputs)
-                print(reader_outputs[0].size())
 
                 break
             break
