@@ -35,7 +35,7 @@ def fusion(cur_table_name):
 
     for row_index, row in enumerate(data[cur_table_name]):
         tokens = row[0].copy()
-        lst_type = row[1][-1].copy()
+        lst_type = row[1][-1]
         token_type = row[1].copy()
         segment_name = cur_table_name + f'_{row_index}'
         extra_segment_name = "0"
@@ -73,7 +73,7 @@ def fusion(cur_table_name):
                     token_mask = [1] * len(tokens)
                     fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
                     tokens = row[0].copy()
-                    lst_type = row[1][-1].copy()
+                    lst_type = row[1][-1]
                     token_type = row[1].copy()
                     extra_segment_name = str(int(extra_segment_name) + 1)
                     if segment_name == "Kishore_Kumar_1_3":
