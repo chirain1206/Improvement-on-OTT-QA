@@ -134,8 +134,10 @@ To evaluate its effectiveness, add option ```--retain_passage``` in evaluation p
 Use GPT-2 model to pre-augment the query in order to relieve the low lexical overlap issue in retriever.
 To enable it, add option ```--load_gpt_model_path link_generator/model-ep9.pt --predict_title``` in the evaluation process.
 
-### Improvement Strategy 3: Use GENRE model to replace GPT-2 model in fusion procedure
-Working on
+### Improvement Strategy 3: Use GENRE model to augment the query
+Go to the same level of Improvement-on-OTT-QA directory and download [GENRE](https://github.com/facebookresearch/GENRE). Move ```GENRE_preprocess.py``` to the GENRE folder and run the script with option ```--option title```. It then generates another traced test file under released_data folder. 
+
+To enable it in the evaluation process, add additional option ```--GENRE_title```.
 
 ## GPT-2 Link Prediction in Table
 Below script predicts the linked passages from the given table segment based on the context using GPT-2 model. To train the model, please use the following command.
