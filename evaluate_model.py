@@ -56,6 +56,7 @@ parser.add_argument(
     type=int,
     help="k value for top_k retrieval",
 )
+parser.add_argument('--retain_passage', action="store_true", default=False, help="Whether or not to retain passages following the improvement strategy")
 parser.add_argument('--max_block_len', type=int, default=512)
 args = parser.parse_args()
 device = torch.device("cuda:0")
@@ -69,10 +70,16 @@ if __name__ == '__main__':
     data = data[:args.eval_size]
 
     # load the matrix of candidates
-    candidate_info = torch.load('./preprocessed_data/dev_candidates.pth')
-    IDX2BLOCK = candidate_info['IDX2BLOCK']
-    BLOCK2IDX = candidate_info['BLOCK2IDX']
-    candidate_matrix = candidate_info['candidate_matrix']
+    if args.retain_passage:
+        candidate_info = torch.load('./preprocessed_data/dev_candidates_retained.pth')
+        IDX2BLOCK = candidate_info['IDX2BLOCK']
+        BLOCK2IDX = candidate_info['BLOCK2IDX']
+        candidate_matrix = candidate_info['candidate_matrix']
+    else:
+        candidate_info = torch.load('./preprocessed_data/dev_candidates.pth')
+        IDX2BLOCK = candidate_info['IDX2BLOCK']
+        BLOCK2IDX = candidate_info['BLOCK2IDX']
+        candidate_matrix = candidate_info['candidate_matrix']
 
     query_config = BertConfig.from_pretrained(
         args.model_name_or_path,
@@ -133,8 +140,12 @@ if __name__ == '__main__':
         print('finished {}/{}; HITS@{} = {:.2f}% \r'.format(num_fin_questions, len(data), args.top_k,
                                                        100 * (num_succ / num_fin_questions)))
     elif args.eval_option == 'both':
-        with open('preprocessed_data/dev_fused_blocks.json', 'r') as f:
-            fused_blocks = json.load(f)
+        if args.retain_passage:
+            with open('preprocessed_data/dev_fused_blocks_retained.json', 'r') as f:
+                fused_blocks = json.load(f)
+        else:
+            with open('preprocessed_data/dev_fused_blocks.json', 'r') as f:
+                fused_blocks = json.load(f)
 
         # load the reader model
         reader_tokenizer = BertTokenizer.from_pretrained(

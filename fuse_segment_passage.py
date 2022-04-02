@@ -76,6 +76,8 @@ def fusion(cur_table_name):
                     lst_type = row[1][-1]
                     token_type = row[1]
                     extra_segment_name = str(int(extra_segment_name) + 1)
+                    if segment_name == "Kishore_Kumar_1_3":
+                        print(len(tokens))
                 else:
                     break
 
