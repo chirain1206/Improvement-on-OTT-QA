@@ -106,7 +106,8 @@ if __name__ == '__main__':
                 answer_row.add(node[1][0])
             answer_segment = set()
             for row in answer_row:
-                answer_segment.add(trace_question['table_id'] + f'_{row}')
+                # answer_segment.add(trace_question['table_id'] + f'_{row}')
+                answer_segment.add(trace_question['table_id'])
 
             # compute vector for the question
             query = trace_question['question']
@@ -122,7 +123,8 @@ if __name__ == '__main__':
             _, indices = torch.topk(retrieval_score, args.top_k)
 
             for i in range(args.top_k):
-                if IDX2BLOCK[indices[i].item()] in answer_segment:
+                # if IDX2BLOCK[indices[i].item()] in answer_segment:
+                if IDX2BLOCK[indices[i].item()][:IDX2BLOCK[indices[i].item()].rfind('_')] in answer_segment:
                     num_succ += 1
                     break
             num_fin_questions += 1
