@@ -32,6 +32,7 @@ with open('data/all_passages.json', 'r') as f:
 
 def fusion(cur_table_name):
     fused_block_dict = {}
+    assert args.retain_passage == False
 
     for row_index, row in enumerate(data[cur_table_name]):
         tokens = row[0]
