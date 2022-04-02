@@ -7,8 +7,8 @@ from tqdm import trange, tqdm
 import argparse
 import torch
 
-def find_urls(search_sentence):
-    pass
+# def find_urls(search_sentence):
+#     pass
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -36,33 +36,33 @@ if __name__ == '__main__':
 
         with open('../Improvement-on-OTT-QA/released_data/dev.traced_GENRE.json', 'w') as f:
             json.dump(process_data, f, indent=2)
-    elif args.option == 'url':
-        segment_url_dict = {}
-
-        with open('../Improvement-on-OTT-QA/preprocessed_data/dev_table_segments.json', 'r') as f:
-            dev_segments = json.load(f)
-        table_names = dev_segments.keys()
-
-        for name in tqdm(table_names):
-            with open(f'../Improvement-on-OTT-QA/data/traindev_tables_tok/{name}.json', 'r') as f:
-                cur_table = json.load(f)
-            title = cur_table['title']
-            sec_title = cur_table['section_title']
-            for row_index, row in enumerate(cur_table['data']):
-                segment_repr = f"In {title}, {sec_title}, "
-                for col_index, header in enumerate(cur_table['header']):
-                    if col_index < len(row) - 1:
-                        segment_repr = segment_repr + header[0] + ' is ' + row[col_index][0] + ', '
-                    else:
-                        segment_repr = segment_repr + header[0] + ' is ' + row[col_index][0] + '.'
-                prefix_allowed_tokens_fn = get_prefix_allowed_tokens_fn(model, [segment_repr])
-                generated = get_entity_spans(model, [segment_repr])
-                generated2 = model.sample(segment_repr, prefix_allowed_tokens_fn=prefix_allowed_tokens_fn)[0][0]['text']
-                print(generated2)
-                print(generated)
-                # segment_url_dict[name + f'_{row_index}'] = find_urls(generated)
-                break
-            break
-
-        # with open(f'../Improvement-on-OTT-QA/link_generator/dev_passage_query_GENRE.json', 'w') as f:
-        #     json.dump(segment_url_dict, f, indent=2)
+    # elif args.option == 'url':
+    #     segment_url_dict = {}
+    #
+    #     with open('../Improvement-on-OTT-QA/preprocessed_data/dev_table_segments.json', 'r') as f:
+    #         dev_segments = json.load(f)
+    #     table_names = dev_segments.keys()
+    #
+    #     for name in tqdm(table_names):
+    #         with open(f'../Improvement-on-OTT-QA/data/traindev_tables_tok/{name}.json', 'r') as f:
+    #             cur_table = json.load(f)
+    #         title = cur_table['title']
+    #         sec_title = cur_table['section_title']
+    #         for row_index, row in enumerate(cur_table['data']):
+    #             segment_repr = f"In {title}, {sec_title}, "
+    #             for col_index, header in enumerate(cur_table['header']):
+    #                 if col_index < len(row) - 1:
+    #                     segment_repr = segment_repr + header[0] + ' is ' + row[col_index][0] + ', '
+    #                 else:
+    #                     segment_repr = segment_repr + header[0] + ' is ' + row[col_index][0] + '.'
+    #             prefix_allowed_tokens_fn = get_prefix_allowed_tokens_fn(model, [segment_repr])
+    #             generated = get_entity_spans(model, [segment_repr], prefix_allowed_tokens_fn=prefix_allowed_tokens_fn)
+    #             generated2 = model.sample([segment_repr], prefix_allowed_tokens_fn=prefix_allowed_tokens_fn)[0][0]['text']
+    #             print(generated2)
+    #             print(generated)
+    #             segment_url_dict[name + f'_{row_index}'] = find_urls(generated)
+    #             break
+    #         break
+    #
+    #     with open(f'../Improvement-on-OTT-QA/link_generator/dev_passage_query_GENRE.json', 'w') as f:
+    #         json.dump(segment_url_dict, f, indent=2)
