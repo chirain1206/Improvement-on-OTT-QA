@@ -104,7 +104,10 @@ def sample_sequence(model, tokenizer, length, context, sub_args, temperature=1):
         if len(name) > 1 and name not in decoded:
             decoded.append(name)
 
-    return '(' + ','.join(decoded) + ')'
+    if len(decoded) == 0:
+        return ''
+    else:
+        return '(' + ','.join(decoded) + ')'
 
 if __name__ == '__main__':
     with open('released_data/dev.traced.json', 'r') as f:
