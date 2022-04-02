@@ -209,9 +209,10 @@ if __name__ == '__main__':
             sum_answer_scores = torch.mul(scores, candidate_answer_scores)
             output_answer = candidate_answer[torch.argmax(sum_answer_scores).item()]
 
-            if fuzz.partial_ratio(output_answer.lower(), trace_question['answer-text'].lower()) > 80:
+            # if fuzz.partial_ratio(output_answer.lower(), trace_question['answer-text'].lower()) > 80:
+            if output_answer.lower() == trace_question['answer-text'].lower():
                 num_succ += 1
             num_fin_questions += 1
-            sys.stdout.write('finished {}/{}; EM score = {} \r'.format(num_fin_questions, len(data), num_succ / num_fin_questions))
+            sys.stdout.write('finished {}/{}; EM score = {}% \r'.format(num_fin_questions, len(data), 100 * (num_succ / num_fin_questions)))
 
-        print('finished {}/{}; EM score = {} \r'.format(num_fin_questions, len(data), num_succ / num_fin_questions))
+        print('finished {}/{}; EM score = {}% \r'.format(num_fin_questions, len(data), 100 * (num_succ / num_fin_questions)))
