@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--option', type=str, default='bm25')
 parser.add_argument('--split', type=str, default='train')
 parser.add_argument('--max_block_len', type=int, default=512)
+parser.add_argument('--retain_passage', action="store_true", default=False, help="Whether or not to retain passages following the improvement strategy")
 args = parser.parse_args()
 
 # logger.info('Initializing ranker...')
@@ -36,10 +37,23 @@ def fusion(cur_table_name):
         tokens = row[0]
         lst_type = row[1][-1]
         token_type = row[1]
+        segment_name = cur_table_name + f'_{row_index}'
+        extra_segment_name = "0"
+
+        # if fused block size already greater than the limit before fusion, return it directly
+        if len(tokens) > args.max_block_len:
+            tokens = tokens[:args.max_block_len]
+            token_type = token_type[:args.max_block_len]
+            token_mask = [1] * len(tokens)
+            if args.retain_passage:
+                fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
+            else:
+                fused_block_dict[segment_name] = [tokens, token_type, token_mask]
+            break
 
         # find linked passages
-        if cur_table_name + f'_{row_index}' in train_urls:
-            linked_url = train_urls[cur_table_name + f'_{row_index}']
+        if segment_name in train_urls:
+            linked_url = train_urls[segment_name]
             linked_passages = [passages[url] for url in linked_url]
         else:
             linked_passages = []
@@ -53,17 +67,23 @@ def fusion(cur_table_name):
             if len(tokens) >= args.max_block_len:
                 tokens = tokens[:args.max_block_len]
                 token_type = token_type[:args.max_block_len]
-                break
+
+                # Improvement strategy enables truncated passages to still link with original table segment
+                if args.retain_passage:
+                    token_mask = [1] * len(tokens)
+                    fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
+                    tokens = row[0]
+                    lst_type = row[1][-1]
+                    token_type = row[1]
+                    extra_segment_name = str(int(extra_segment_name) + 1)
+                else:
+                    break
 
         token_mask = [1] * len(tokens)
-
-        # truncate the fused block
-        if len(tokens) > args.max_block_len:
-            tokens = tokens[:args.max_block_len]
-            token_type = token_type[:args.max_block_len]
-            token_mask = token_mask[:args.max_block_len]
-
-        fused_block_dict[cur_table_name + f'_{row_index}'] = [tokens, token_type, token_mask]
+        if args.retain_passage:
+            fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
+        else:
+            fused_block_dict[segment_name] = [tokens, token_type, token_mask]
 
     return fused_block_dict
 
@@ -93,5 +113,9 @@ if __name__ == '__main__':
             for row in _.keys():
                 fused_blocks[row] = _[row]
 
-        with open(f'preprocessed_data/{args.split}_fused_blocks.json', 'w') as f:
-            json.dump(fused_blocks, f, indent=2)
+        if args.retain_passage:
+            with open(f'preprocessed_data/{args.split}_fused_blocks_retained.json', 'w') as f:
+                json.dump(fused_blocks, f, indent=2)
+        else:
+            with open(f'preprocessed_data/{args.split}_fused_blocks.json', 'w') as f:
+                json.dump(fused_blocks, f, indent=2)

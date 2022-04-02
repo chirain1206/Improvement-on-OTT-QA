@@ -115,12 +115,25 @@ python fuse_segment_passage.py --split dev
 ```
 Above commands create fused blocks for dev set.
 
+### Step4-2: Encode candidates in the test set in vector form
+```
+python encode_candidates.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/block_model/checkpoint-epoch4 --candidates_file preprocessed_data/dev_fused_blocks.json
+```
+This commands utilizes the trained block model to encode each candidate fused block in the test set.
+
+### Step4-3: Evaludate trained models
+```
+python evaluate_model.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/query_model/checkpoint-epoch4 --eval_option retriever
+python evaluate_model.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/query_model/checkpoint-epoch4 --eval_option both --load_reader_model_path reader/2022_04_01_05_50_38/checkpoint-epoch3 --eval_size 1000
+```
+First script evaluates the performance of the retriever model independetly and the second script evaluates the performance of the retriever and reader model jointly.
+
 ## GPT-2 Link Prediction in Table
-We also provide the script to predict the links from the given table based on the context using GPT-2 model. To train the model, please use the following command.
+Below script predicts the linked passages from the given table segment based on the context using GPT-2 model. To train the model, please use the following command.
 ```
 python link_prediction.py --dataset data/traindev_tables.json --do_train --batch_size 512
 ```
-To generate links, please run
+To generate links, run
 ```
 python link_prediction.py --do_all --load_from link_generator/model-ep9.pt --dataset data/all_plain_tables.json --batch_size 256 --shard [current_iteration]@[total_iteration_number]
 ```
