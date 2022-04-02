@@ -193,8 +193,8 @@ if __name__ == '__main__':
                 start_probs = nn.functional.softmax(reader_outputs[0], dim=1)
                 start_index = torch.argmax(start_probs, dim=1).item()
                 start_score = start_probs[0][start_index].item()
-                # end_probs = nn.functional.softmax(reader_outputs[1], dim=1)[:, start_index:]
-                end_probs = reader_outputs[1][:, start_index:]
+                end_probs = nn.functional.softmax(reader_outputs[1], dim=1)[:, start_index:]
+                # end_probs = reader_outputs[1][:, start_index:]
                 end_index = torch.argmax(end_probs, dim=1).item()
                 end_score = end_probs[0][end_index].item()
                 end_index = end_index + start_index
