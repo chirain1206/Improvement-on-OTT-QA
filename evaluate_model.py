@@ -8,6 +8,7 @@ from train_retriever import VectorizeModel
 from transformers import (BertConfig, BertTokenizer, BertModel, BertForQuestionAnswering)
 from torch import nn
 import torch
+from fuzzywuzzy import fuzz
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -208,7 +209,7 @@ if __name__ == '__main__':
             sum_answer_scores = torch.mul(scores, candidate_answer_scores)
             output_answer = candidate_answer[torch.argmax(sum_answer_scores).item()]
 
-            if output_answer.lower() == trace_question['answer-text'].lower():
+            if fuzz.partial_ratio(output_answer.lower(), trace_question['answer-text'].lower()) > 80:
                 num_succ += 1
             num_fin_questions += 1
             sys.stdout.write('finished {}/{}; EM score = {} \r'.format(num_fin_questions, len(data), num_succ / num_fin_questions))
