@@ -34,9 +34,6 @@ def fusion(cur_table_name):
     fused_block_dict = {}
 
     for row_index, row in enumerate(data[cur_table_name]):
-        if cur_table_name == "Orson_Scott_Card_bibliography_0":
-            print(len(data[cur_table_name]))
-
         tokens = row[0]
         lst_type = row[1][-1]
         token_type = row[1]
@@ -52,7 +49,7 @@ def fusion(cur_table_name):
                 fused_block_dict[segment_name + '@' + extra_segment_name] = [tokens, token_type, token_mask]
             else:
                 fused_block_dict[segment_name] = [tokens, token_type, token_mask]
-            break
+            continue
 
         # find linked passages
         if segment_name in train_urls:
