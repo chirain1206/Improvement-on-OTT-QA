@@ -26,13 +26,13 @@ ranker = retriever.get_class(args.option)(bm25_path=args.model, strict=False)
 def query_to_url(table_segment):
     segment_name = table_segment[0]
     query_lst = table_segment[1]
-    url_lst = []
+    url_lst = set()
 
     for query in query_lst:
         if len(ranker.closest_docs(query, 1)[0]) > 0:
-            url_lst.append(ranker.closest_docs(query, 1)[0][0])
+            url_lst.add(ranker.closest_docs(query, 1)[0][0])
 
-    return [segment_name, url_lst]
+    return [segment_name, list(url_lst)]
 
 if __name__ == '__main__':
     n_threads = os.cpu_count()
