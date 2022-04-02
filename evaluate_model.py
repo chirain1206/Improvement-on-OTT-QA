@@ -162,7 +162,7 @@ if __name__ == '__main__':
                 cache_dir=args.cache_dir if args.cache_dir else None,
             )
             reader_model.resize_token_embeddings(len(reader_tokenizer))
-            reader_model.load_state_dict(torch.load(os.path.join(args.load_reader_model_path, 'pytorch_model.bin')))
+            # reader_model.load_state_dict(torch.load(os.path.join(args.load_reader_model_path, 'pytorch_model.bin')))
             if args.n_gpu > 1:
                 reader_model = nn.DataParallel(reader_model)
             reader_model.to(args.device)
