@@ -19,13 +19,6 @@ This respository contains the OTT-QA dataset used in [Open Question Answering ov
 - Pytorch 1.4
 - scipy
 
-We suggest using virtual environment to install these dependencies.
-```
-conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
-pip install transformers
-pip install pexpect
-```
-
 ## Step1: Preliminary Step
 ### Step1-1: Download the necessary files 
 ```
@@ -155,7 +148,7 @@ python link_prediction.py --do_all --load_from link_generator/model-ep9.pt --dat
 ```
 This command will generate all the link mapping in the link_generator/ folder.
 ```
-python check_gpt_performance.py --evaluation_size 10000
+python check_gpt_performance.py --evaluation_size 1000
 ```
 This command provides a simple evaluation to the accuracy of prediction.
 
