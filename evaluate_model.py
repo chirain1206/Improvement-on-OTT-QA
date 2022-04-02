@@ -194,6 +194,7 @@ if __name__ == '__main__':
                 end_index = end_index + start_index
 
                 print(trace_question['question'])
+                print(trace_question['answer-text'])
                 print(start_index, start_score)
                 print(end_index, end_score)
                 print(reader_input_tokens[start_index:end_index+1])
