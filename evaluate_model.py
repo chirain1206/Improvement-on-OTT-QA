@@ -73,7 +73,7 @@ args.n_gpu = torch.cuda.device_count()
 args.device = device
 
 def sample_sequence(model, tokenizer, length, context, args, temperature=1):
-    generated = torch.LongTensor([tokenizer.encode(context + '[START]', add_special_tokens=False)])
+    generated = torch.LongTensor([tokenizer.encode(context + '[START]', add_special_tokens=False)]).to(args.device)
     predict_index = generated.size()[1]
     batch_size = generated.shape[0]
 
@@ -96,7 +96,7 @@ def sample_sequence(model, tokenizer, length, context, args, temperature=1):
             if all(finished_sentence):
                 break
 
-    prediction = finished_sentence[:, prefix.shape[1]:].cpu().data.numpy()
+    prediction = finished_sentence[:, predict_index:].cpu().data.numpy()
     text = tokenizer.decode(prediction[0], clean_up_tokenization_spaces=True)
     decoded = []
     for _ in text[:text.find('[EOS]')].split(' # '):
