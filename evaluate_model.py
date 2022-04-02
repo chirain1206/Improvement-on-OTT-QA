@@ -66,6 +66,7 @@ parser.add_argument(
 )
 parser.add_argument('--retain_passage', action="store_true", default=False, help="Whether or not to retain passages following the improvement strategy")
 parser.add_argument('--predict_title', action="store_true", default=False, help="Whether or not to predict title following the improvement strategy")
+parser.add_argument('--GENRE_title', action="store_true", default=False, help="Whether or not to use GENRE title following the improvement strategy")
 parser.add_argument('--random', action="store_true", default=False, help="Whether or not to evaluate the model in random questions")
 parser.add_argument('--max_block_len', type=int, default=512)
 args = parser.parse_args()
@@ -111,8 +112,12 @@ def sample_sequence(model, tokenizer, length, context, sub_args, temperature=1):
         return '(' + ','.join(decoded) + ')'
 
 if __name__ == '__main__':
-    with open('released_data/dev.traced.json', 'r') as f:
-        data = json.load(f)
+    if args.GENRE_title:
+        with open('released_data/dev.traced_GENRE.json', 'r') as f:
+            data = json.load(f)
+    else:
+        with open('released_data/dev.traced.json', 'r') as f:
+            data = json.load(f)
     if args.random:
         random.shuffle(data)
     data = data[:args.eval_size]

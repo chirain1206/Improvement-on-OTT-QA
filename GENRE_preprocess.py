@@ -1,9 +1,11 @@
 import json
 from genre.trie import Trie
-from genre.fairseq_model import GENRE
+from genre.hf_model import GENRE
 from genre.entity_linking import get_end_to_end_prefix_allowed_tokens_fn_hf as get_prefix_allowed_tokens_fn
 from genre.utils import get_entity_spans_hf as get_entity_spans
 from tqdm import trange, tqdm
+import argparse
+import torch
 
 def find_urls(search_sentence):
     pass
