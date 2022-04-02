@@ -148,6 +148,8 @@ if __name__ == '__main__':
             retrieval_score = nn.functional.cosine_similarity(query_cls, candidate_matrix, dim=1)
             scores, indices = torch.topk(retrieval_score, args.top_k)
             retrieval_blocks = [IDX2BLOCK[indice.item()] for indice in indices]
+            candidate_answer = []
+            candidate_answer_scores = []
 
             # load the reader model
             reader_tokenizer = BertTokenizer.from_pretrained(
@@ -188,14 +190,23 @@ if __name__ == '__main__':
                 start_probs = nn.functional.softmax(reader_outputs[0], dim=1)
                 start_index = torch.argmax(start_probs, dim=1).item()
                 start_score = start_probs[0][start_index].item()
-                end_probs = nn.functional.softmax(reader_outputs[1][:,start_index:], dim=1)
+                # end_probs = nn.functional.softmax(reader_outputs[1][:,start_index:], dim=1)
+                end_probs = nn.functional.softmax(reader_outputs[1], dim=1)[:, start_index:]
                 end_index = torch.argmax(end_probs, dim=1).item()
                 end_score = end_probs[0][end_index].item()
                 end_index = end_index + start_index
 
-                print(trace_question['question'])
-                print(trace_question['answer-text'])
-                print(start_index, start_score)
-                print(end_index, end_score)
-                print(reader_tokenizer.decode(reader_input_tokens[0][start_index:end_index+1]))
+                # extract answer span
+                answer_span_prob = start_score * end_score
+                answer_span = reader_tokenizer.decode(reader_input_tokens[0][start_index:end_index+1])
+                candidate_answer.append(answer_span)
+                candidate_answer_scores.append(answer_span_prob)
+
+            candidate_answer_scores = torch.Tensor(candidate_answer_scores)
+            sum_answer_scores = torch.mul(scores, candidate_answer_scores)
+            output_answer = candidate_answer[torch.argmax(sum_answer_scores).item()]
+            print(trace_question['question'])
+            print(trace_question['answer-text'])
+            print(output_answer)
+
             break
