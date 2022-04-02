@@ -5,7 +5,7 @@ import os
 import sys
 import random
 from train_retriever import VectorizeModel
-from transformers import (BertConfig, BertTokenizer, BertModel)
+from transformers import (BertConfig, BertTokenizer, BertModel, BertForQuestionAnswering)
 from torch import nn
 import torch
 
@@ -23,7 +23,14 @@ parser.add_argument(
     default="",
     type=str,
     required=True,
-    help="Path to the model that have been trained"
+    help="Path to the retriever model that have been trained"
+)
+parser.add_argument(
+    "--load_reader_model_path",
+    default="",
+    type=str,
+    required=True,
+    help="Path to the reader model that have been trained"
 )
 parser.add_argument(
     "--model_name_or_path",
@@ -49,6 +56,7 @@ parser.add_argument(
     type=int,
     help="k value for top_k retrieval",
 )
+parser.add_argument('--max_block_len', type=int, default=512)
 args = parser.parse_args()
 device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
@@ -123,6 +131,9 @@ if __name__ == '__main__':
         print('finished {}/{}; HITS@{} = {} \r'.format(num_fin_questions, len(data), args.top_k,
                                                        num_succ / num_fin_questions))
     elif args.eval_option == 'both':
+        with open('preprocessed_data/dev_fused_blocks.json', 'r') as f:
+            fused_blocks = json.load(f)
+
         for trace_question in data:
             # compute vector for the question
             query = trace_question['question']
@@ -133,6 +144,48 @@ if __name__ == '__main__':
             query_input_masks = torch.LongTensor([[1] * len(query_tokens)]).to(args.device)
             query_cls = query_model(query_input_tokens, query_input_types, query_input_masks).cpu()
 
-            # compute similarity score
+            # compute similarity score and retrieve top-k blocks
             retrieval_score = nn.functional.cosine_similarity(query_cls, candidate_matrix, dim=1)
             scores, indices = torch.topk(retrieval_score, args.top_k)
+            retrieval_blocks = [IDX2BLOCK[indice.item()] for indice in indices]
+
+            # load the reader model
+            reader_tokenizer = BertTokenizer.from_pretrained(
+                args.model_name_or_path,
+                do_lower_case=True,
+                cache_dir=args.cache_dir
+            )
+            reader_tokenizer.add_tokens(["[TAB]", "[TITLE]", "[ROW]", "[MAX]", "[MIN]", "[EAR]", "[LAT]"])
+            reader_model = BertForQuestionAnswering.from_pretrained(
+                args.model_name_or_path,
+                config=query_config,
+                cache_dir=args.cache_dir if args.cache_dir else None,
+            )
+            reader_model.resize_token_embeddings(len(reader_tokenizer))
+            reader_model.load_state_dict(torch.load(args.load_reader_model_path))
+            if args.n_gpu > 1:
+                reader_model = nn.DataParallel(reader_model)
+            reader_model.to(args.device)
+            reader_model.eval()
+
+            for cur_block in retrieval_blocks:
+                block_len_limit = args.max_block_len - len(query_tokens)
+                reader_input_tokens = query_tokens + fused_blocks[cur_block][0][:block_len_limit]
+                reader_input_types = [1] * (len(query_tokens) - 1) + [0] + fused_blocks[cur_block][1][:block_len_limit]
+                reader_input_masks = [1] * len(query_tokens) + fused_blocks[cur_block][2][:block_len_limit]
+
+                reader_input_tokens = torch.LongTensor([reader_tokenizer.convert_tokens_to_ids(reader_input_tokens)]).to(args.device)
+                reader_input_types = torch.LongTensor([reader_input_types]).to(args.device)
+                reader_input_masks = torch.LongTensor([reader_input_masks]).to(args.device)
+
+                reader_inputs = {
+                    "input_ids": reader_input_tokens,
+                    "attention_mask": reader_input_types,
+                    "token_type_ids": reader_input_masks,
+                }
+
+                reader_outputs = reader_model(**inputs)
+                print(reader_outputs)
+
+                break
+            break
