@@ -32,9 +32,11 @@ with open('data/all_passages.json', 'r') as f:
 
 def fusion(cur_table_name):
     fused_block_dict = {}
-    assert args.retain_passage == False
 
     for row_index, row in enumerate(data[cur_table_name]):
+        if cur_table_name == "Orson_Scott_Card_bibliography_0":
+            print(len(data[cur_table_name]))
+
         tokens = row[0]
         lst_type = row[1][-1]
         token_type = row[1]
@@ -86,8 +88,6 @@ def fusion(cur_table_name):
         else:
             fused_block_dict[segment_name] = [tokens, token_type, token_mask]
 
-    if cur_table_name == "Orson_Scott_Card_bibliography_0":
-        print(fused_block_dict)
     return fused_block_dict
 
 if __name__ == '__main__':
