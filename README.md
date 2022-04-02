@@ -95,14 +95,14 @@ It creates fine-tune data for the single-block reader.
 ## Step3: Training of models
 ### Step3-1: Train the fused block retriever
 ```
-python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 2048 --learning_rate 1e-5 --train_steps 10000
-python train_retriever.py --option fine_tune --do_lower_case --train_file retriever/fine_tune_pretrain_data.json --batch_size 2048 --load_model_path retriever/ICT/2022_03_28_15_02_36/
+python train_retriever.py --option ICT --do_lower_case --train_file retriever/ICT_pretrain_data.json --batch_size 512 --learning_rate 1e-5 --train_steps 10000
+python train_retriever.py --option fine_tune --do_lower_case --train_file retriever/fine_tune_pretrain_data.json --batch_size 512 --load_model_path retriever/ICT/2022_03_28_15_02_36/
 ```
 First command uses ICT to pretrain the retriever model, then the second command fine-tunes the model on OTT-QA. Both encoders are based on BERT-base-uncased model from HugginFace implementation.
 
 ### Step3-2: Train the single-block reader
 ```
-python train_reader.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 24 --learning_rate 1e-5 --num_train_epoches 10
+python train_reader.py --do_lower_case --train_file reader/fine_tune_data.json --batch_size 32 --learning_rate 1e-5 --num_train_epoches 10
 ```
 This command fine-tunes the single-block reader model.
 
@@ -124,9 +124,24 @@ This commands utilizes the trained block model to encode each candidate fused bl
 ### Step4-3: Evaludate trained models
 ```
 python evaluate_model.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/query_model/checkpoint-epoch4 --eval_option retriever
-python evaluate_model.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/query_model/checkpoint-epoch4 --eval_option both --load_reader_model_path reader/2022_04_01_05_50_38/checkpoint-epoch3 --eval_size 1000
+python evaluate_model.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/query_model/checkpoint-epoch4 --eval_option both --load_reader_model_path reader/2022_04_01_05_50_38/checkpoint-epoch3 --eval_size 200
 ```
 First script evaluates the performance of the retriever model independetly and the second script evaluates the performance of the retriever and reader model jointly.
+
+## Step5: Improvements
+### Improvement Strategy 1: Retain remaining passages in the fusion procedure
+In the fusion procedure, each table segment is linked with multiple passages. When the size of fused block reaches token limit, remaining table segments will be truncated. This strategy keeps remaining passages and links them with original table segment again to form other fused blocks, which could be done by following commands.
+```
+python fuse_segment_passage.py --split dev --retain_passage
+python encode_candidates.py --load_model_path retriever/fine_tune/2022_03_30_04_07_24/block_model/checkpoint-epoch4 --candidates_file preprocessed_data/dev_fused_blocks_retained.json --retain_passage
+```
+To evaluate its effectiveness, add option ```--retain_passage``` in evaluation process.
+
+### Improvement Strategy 2: Use GPT-2 model to augment the query
+Use GPT-2 model to pre-augment the query in order to relieve the low lexical overlap issue in retriever. Add option ```--load_gpt_model_path link_generator/model-ep9.pt --predict_title``` in the evaluation process to enable it.
+
+### Improvement Strategy 3: Use GENRE model to replace GPT-2 model in fusion procedure
+Working on
 
 ## GPT-2 Link Prediction in Table
 Below script predicts the linked passages from the given table segment based on the context using GPT-2 model. To train the model, please use the following command.
