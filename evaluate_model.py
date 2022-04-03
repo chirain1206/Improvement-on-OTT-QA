@@ -178,7 +178,7 @@ if __name__ == '__main__':
             else:
                 query = trace_question['question']
                 if args.GENRE_title:
-                    query = query.replace('{','').replace('}','').replace('[','(').replace(']',')')
+                    query = query.replace('{','').replace('}','').replace('[',',').replace(']',',')
             answer_row = set()
             for node in trace_question['answer-node']:
                 answer_row.add(node[1][0])
@@ -247,7 +247,7 @@ if __name__ == '__main__':
             else:
                 query = trace_question['question']
                 if args.GENRE_title:
-                    query = query.replace('{','').replace('}','').replace('[','(').replace(']',')')
+                    query = query.replace('{','').replace('}','').replace('[',',').replace(']',',')
 
             # compute vector for the question
             query_tokens = '[CLS] ' + query + ' [SEP]'
