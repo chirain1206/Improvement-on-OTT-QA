@@ -74,6 +74,24 @@ device = torch.device("cuda:0")
 args.n_gpu = torch.cuda.device_count()
 args.device = device
 
+def replace_mention_with_entity(sentence):
+    mention_lst = []
+    processed_sentence = sentence
+    cur_start_index = sentence.find('{')
+    while cur_start_index != -1:
+        cur_end_index = sentence.find('}', cur_start_index + 1)
+        if cur_end_index == -1:
+            break
+        else:
+            mention_lst.append(sentence[cur_start_index:cur_end_index + 1])
+            cur_start_index = sentence.find('{', cur_end_index + 1)
+
+    for mention in mention_lst:
+        processed_sentence = processed_sentence.replace(" " + mention, '')
+    processed_sentence = processed_sentence.replace('[ ', "").replace(' ]',"")
+
+    return processed_sentence
+
 def sample_sequence(model, tokenizer, length, context, sub_args, temperature=1):
     generated = torch.LongTensor([tokenizer.encode(context + '[START]', add_special_tokens=False)]).to(args.device)
     predict_index = generated.size()[1]
@@ -178,7 +196,8 @@ if __name__ == '__main__':
             else:
                 query = trace_question['question']
                 if args.GENRE_title:
-                    query = query.replace('{','').replace('}','').replace('[',',').replace(']',',')
+                    query = replace_mention_with_entity(query)
+                    # query = query.replace('{','').replace('}','').replace('[','(').replace(']',')')
             answer_row = set()
             for node in trace_question['answer-node']:
                 answer_row.add(node[1][0])
@@ -247,7 +266,8 @@ if __name__ == '__main__':
             else:
                 query = trace_question['question']
                 if args.GENRE_title:
-                    query = query.replace('{','').replace('}','').replace('[',',').replace(']',',')
+                    query = replace_mention_with_entity(query)
+                    # query = query.replace('{','').replace('}','').replace('[','(').replace(']',')')
 
             # compute vector for the question
             query_tokens = '[CLS] ' + query + ' [SEP]'
