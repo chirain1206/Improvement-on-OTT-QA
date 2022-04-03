@@ -177,6 +177,8 @@ if __name__ == '__main__':
                 query = trace_question['question'] + prediction
             else:
                 query = trace_question['question']
+                if args.GENRE_title:
+                    query = query.replace('{','').replace('}','').replace('[','(').replace(']',')')
             answer_row = set()
             for node in trace_question['answer-node']:
                 answer_row.add(node[1][0])
@@ -244,9 +246,10 @@ if __name__ == '__main__':
                 query = trace_question['question'] + prediction
             else:
                 query = trace_question['question']
+                if args.GENRE_title:
+                    query = query.replace('{','').replace('}','').replace('[','(').replace(']',')')
 
             # compute vector for the question
-            query = trace_question['question']
             query_tokens = '[CLS] ' + query + ' [SEP]'
             query_tokens = query_tokenizer.tokenize(query_tokens)
             query_input_tokens = torch.LongTensor([query_tokenizer.convert_tokens_to_ids(query_tokens)]).to(args.device)
